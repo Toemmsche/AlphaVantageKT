@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AlphaVantageKT.iml" filepath="$PROJECT_DIR$/AlphaVantageKT.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AlphaVantageKT.main.iml" filepath="$PROJECT_DIR$/.idea/modules/AlphaVantageKT.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AlphaVantageKT.test.iml" filepath="$PROJECT_DIR$/.idea/modules/AlphaVantageKT.test.iml" />
     </modules>
   </component>
 </project>
