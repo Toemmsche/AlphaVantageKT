@@ -1,5 +1,6 @@
 package main.java.kotlin.alphavantage
 
+import main.java.kotlin.entities.quote.ExchangeQuote
 import main.java.kotlin.entities.quote.HistoricalQuote
 import main.java.kotlin.enums.Scope
 import main.java.kotlin.enums.Interval
@@ -57,7 +58,7 @@ object Requester {
         }
     }
 
-    fun getExchangeRate(fromCurrency: String, toCurrency: String): Double {
+    fun getExchangeRate(fromCurrency: String, toCurrency: String): ExchangeQuote {
         return Parser.parseExchangeRateHTTPResponse(
             request("/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${fromCurrency}&to_currency=$toCurrency&apikey=$key")
                 .body()
