@@ -58,6 +58,7 @@ object Parser {
         var ask: Double= 0.0
 
         for (line in response) {
+            if (!line.contains(":")) continue
             val uf = line.split(":".toRegex(), 2)[1]
             when {
                 line.contains("1. From_Currency Code") -> {
