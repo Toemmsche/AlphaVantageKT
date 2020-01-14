@@ -12,7 +12,7 @@ import java.net.http.HttpResponse
 
 object Requester {
 
-    val key: String = "CSE3RJSJLAVEG0HL"
+    lateinit var key: String
     val host = "https://www.alphavantage.co"
 
     private fun request(query: String): HttpResponse<String> {
