@@ -4,9 +4,9 @@ import main.java.kotlin.entities.history.FXHistory
 import main.java.kotlin.enums.Scope
 
 class FX(
-    fromSymbol : String,
+    val fromSymbol : String,
     val toSymbol : String
-) : Trackable, Currency(fromSymbol) {
+) : Trackable {
 
     //Historical data
     override val intradayHistory: FXHistory =
