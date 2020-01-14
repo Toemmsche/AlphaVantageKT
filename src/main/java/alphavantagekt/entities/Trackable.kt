@@ -1,12 +1,12 @@
-package main.java.kotlin.entities
+package alphavantagekt.entities
 
-import main.java.kotlin.entities.history.History
+import alphavantagekt.entities.history.History
 
 interface Trackable {
 
     //Historical data
-    abstract val intradayHistory : History
-    abstract val dailyHistory : History
-    abstract val weeklyHistory : History
-    abstract val monthlyHistory : History
+    val intradayHistory : History
+    val dailyHistory : History
+    val weeklyHistory : History
+    val monthlyHistory : History
 }

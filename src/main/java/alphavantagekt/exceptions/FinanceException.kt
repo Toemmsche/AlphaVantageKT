@@ -1,6 +1,5 @@
-package main.java.kotlin.exceptions
+package alphavantagekt.exceptions
 
 import java.lang.IllegalArgumentException
 
-class FinanceException(message : String) : IllegalArgumentException(message) {
-}
+class FinanceException(message : String) : IllegalArgumentException(message)

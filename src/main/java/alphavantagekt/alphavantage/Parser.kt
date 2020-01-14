@@ -1,28 +1,34 @@
-package main.java.kotlin.alphavantage
+package alphavantagekt.alphavantage
 
-import main.java.kotlin.entities.quote.ExchangeQuote
-import main.java.kotlin.entities.quote.HistoricalQuote
+import alphavantagekt.entities.quote.ExchangeQuote
+import alphavantagekt.entities.quote.HistoricalQuote
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.entities.quote.IndicatorQuote
+import alphavantagekt.entities.quote.IndicatorQuote
+import java.net.http.HttpResponse
+import java.text.ParseException
 
 object Parser {
 
     val sdfWithTime = SimpleDateFormat("yyyy-MM-dd HH:mm:SS")
+    val sdfWithOutSeconds = SimpleDateFormat("yyyy-MM-dd HH:mm")
     val sdfDaysOnly = SimpleDateFormat("yyyy-MM-dd")
 
-    fun parseHistoryHTTPResponse(response: List<String>): MutableList<HistoricalQuote> {
-        val quotes = ArrayList<HistoricalQuote>();
-        for (line in response) {
+    val dateFormats = listOf<SimpleDateFormat>(sdfWithTime, sdfWithOutSeconds, sdfDaysOnly)
+
+    fun parseHistoryHTTPResponse(response: HttpResponse<String>): MutableList<HistoricalQuote> {
+        val lines = response.body().lines()
+        val quotes = ArrayList<HistoricalQuote>()
+        for (line in lines) {
             parseHistoryCSVLine(line)?.also { quotes.add(it) }
         }
         return quotes
     }
 
     private fun parseHistoryCSVLine(line: String): HistoricalQuote? {
-        if (!line.contains(",") || line.startsWith("timestamp")) return null
+        if (!line.contains(",") || line.startsWith("time")) return null
 
         val arr = line.split(",")
 
@@ -42,14 +48,21 @@ object Parser {
         //FX quotes and indicator quotes do not have a specified volume
         var volume: Long? = null
         try {
-            volume = arr[5].toLong()
+            //Cryptocurrency quotes also show the values in USD before volume
+            if (arr.size > 6) {
+                volume = arr[9]?.toDouble()?.toLong()
+            } else {
+                volume = arr[5]?.toDouble()?.toLong()
+            }
         } catch (e: Exception) {
         }
 
         return HistoricalQuote(date, open, high, low, close, volume)
     }
 
-    fun parseExchangeRateHTTPResponse(response: List<String>): ExchangeQuote {
+    fun parseExchangeRateHTTPResponse(response: HttpResponse<String>): ExchangeQuote {
+        val lines = response.body().lines()
+
         lateinit var timestamp: Date
         lateinit var fromCode: String
         lateinit var toCode: String
@@ -57,7 +70,7 @@ object Parser {
         var bid: Double = 0.0
         var ask: Double = 0.0
 
-        for (line in response) {
+        for (line in lines) {
             if (!line.contains(":")) continue
             val uf = line.split(":".toRegex(), 2)[1]
             when {
@@ -85,25 +98,29 @@ object Parser {
         return ExchangeQuote(timestamp, fromCode, toCode, rate, bid, ask)
     }
 
-    fun parseIndicatorHTTPResponse(response: List<String>): MutableList<IndicatorQuote> {
+    fun parseIndicatorHTTPResponse(response: HttpResponse<String>): MutableList<IndicatorQuote> {
+        val lines = response.body().lines()
         val quotes = ArrayList<IndicatorQuote>()
-        for (line in response) {
+        for (line in lines) {
             parseIndicatorCSVLine(line)?.also { quotes.add(it) }
         }
         return quotes
     }
 
     private fun parseIndicatorCSVLine(line: String): IndicatorQuote? {
-        if (!line.contains(",") || line.startsWith("timestamp")) return null
+        println(line)
+        if (!line.contains(",") || line.startsWith("time")) return null
 
         val arr = line.split(",")
 
         //Only intraday quotes have an hour attached to them
         lateinit var date: Date
-        try {
-            date = sdfWithTime.parse(arr[0])
-        } catch (e: Exception) {
-            date = sdfDaysOnly.parse(arr[0])
+        for (sdf in dateFormats) {
+            try {
+                date = sdf.parse(arr[0])
+                break;
+            } catch (e: ParseException) {
+            }
         }
         val value = arr[1].toDouble()
         return IndicatorQuote(date, value)

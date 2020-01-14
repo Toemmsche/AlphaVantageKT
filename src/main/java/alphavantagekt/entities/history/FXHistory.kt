@@ -1,9 +1,11 @@
-package main.java.kotlin.entities.history
+package alphavantagekt.entities.history
 
-import main.java.kotlin.alphavantage.Requester
-import main.java.kotlin.entities.FX
-import main.java.kotlin.entities.quote.HistoricalQuote
-import main.java.kotlin.enums.Scope
+import alphavantagekt.alphavantage.Requester
+import alphavantagekt.entities.FX
+import alphavantagekt.entities.quote.HistoricalQuote
+import alphavantagekt.enums.Interval
+import alphavantagekt.enums.Scope
+import java.lang.UnsupportedOperationException
 
 
 class FXHistory(
@@ -11,15 +13,21 @@ class FXHistory(
     scope: Scope
 ) : History(scope) {
 
-    override fun update(): Boolean {
+    override fun update(): FXHistory {
         data = Requester.getFXData(underlyingAsset.fromSymbol, underlyingAsset.toSymbol, scope, null)
-        return true
+        return this
+    }
+
+    override fun update(interval: Interval): FXHistory {
+        if (scope != Scope.INTRADAY) throw UnsupportedOperationException("Parameter 'interval' can only be used with intraday scope")
+        data = Requester.getFXData(underlyingAsset.fromSymbol, underlyingAsset.toSymbol, scope, interval)
+        return this
     }
 
     override fun toString(): String {
         val sb = StringBuilder()
-        sb.append("From_Currency: ${underlyingAsset.fromSymbol} To_Currency: ${underlyingAsset.toSymbol} Scope:${scope.FXFormatted}\n")
-        for (q: HistoricalQuote in data) {
+        sb.append("from_Currency: ${underlyingAsset.fromSymbol}, to_Currency: ${underlyingAsset.toSymbol}, scope:${scope.FXFormatted}\n")
+        for (q in data) {
             sb.append("$q\n")
         }
         sb.dropLast(2)

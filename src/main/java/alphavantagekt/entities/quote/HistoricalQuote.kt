@@ -1,4 +1,4 @@
-package main.java.kotlin.entities.quote
+package alphavantagekt.entities.quote
 
 import java.util.*
 

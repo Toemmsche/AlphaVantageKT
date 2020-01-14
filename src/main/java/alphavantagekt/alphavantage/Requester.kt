@@ -1,16 +1,17 @@
-package main.java.kotlin.alphavantage
+package alphavantagekt.alphavantage
 
-import main.java.kotlin.entities.quote.ExchangeQuote
-import main.java.kotlin.entities.quote.HistoricalQuote
-import main.java.kotlin.enums.Scope
-import main.java.kotlin.enums.Interval
-import main.java.kotlin.exceptions.FinanceException
+import alphavantagekt.entities.quote.ExchangeQuote
+import alphavantagekt.entities.quote.HistoricalQuote
+
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import kotlin.entities.quote.IndicatorQuote
-import kotlin.enums.IndicatorInterval
+import alphavantagekt.entities.quote.IndicatorQuote
+import alphavantagekt.enums.IndicatorInterval
+import alphavantagekt.enums.Interval
+import alphavantagekt.enums.Scope
+import alphavantagekt.exceptions.FinanceException
 
 object Requester {
 
@@ -22,24 +23,20 @@ object Requester {
         val request = HttpRequest
             .newBuilder(URI(host + query))
             .build()
-        return client.send(request, HttpResponse.BodyHandlers.ofString())
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        if (response.statusCode() == 200 && !response.body().contains("Error Message")) {
+            return response
+        } else if (response.statusCode() != 200) {
+            throw FinanceException("Unsuccessful HTTP Request [$query]")
+        } else {
+            throw FinanceException("Unsuccessful API Request [$query]: ${response.body()}")
+        }
     }
 
     fun getShareData(symbol: String, scope: Scope, interval: Interval?): MutableList<HistoricalQuote> {
         val url = "/query?function=${scope.shareFormatted}&symbol=${symbol}&interval=${interval?.formatted
             ?: "5min"}&apikey=$key&datatype=csv"
-        val response = request(url)
-        if (response.statusCode() == 200 && !response.body().contains("Error Message")) {
-            return Parser.parseHistoryHTTPResponse(
-                response
-                    .body()
-                    .lines()
-            )
-        } else if (response.statusCode() != 200) {
-            throw FinanceException("Unsuccessful HTTP Request [$url]")
-        } else {
-            throw FinanceException("Unsuccessful API Request [$url]: ${response.body()}")
-        }
+        return Parser.parseHistoryHTTPResponse(request(url))
     }
 
     fun getFXData(
@@ -51,35 +48,14 @@ object Requester {
         val url =
             "/query?function=${scope.FXFormatted}&from_symbol=${fromSymbol}&to_symbol=$toSymbol&interval=${interval?.formatted
                 ?: "5min"}&apikey=$key&datatype=csv"
-        val response = request(url)
-        if (response.statusCode() == 200 && !response.body().contains("Error Message")) {
-            return Parser.parseHistoryHTTPResponse(
-                response
-                    .body()
-                    .lines()
-            )
-        } else if (response.statusCode() != 200) {
-            throw FinanceException("Unsuccessful HTTP Request [$url]")
-        } else {
-            throw FinanceException("Unsuccessful API Request [$url]: ${response.body()}")
-        }
+
+        return Parser.parseHistoryHTTPResponse(request(url))
     }
 
     fun getExchangeRate(fromCurrency: String, toCurrency: String): ExchangeQuote {
         val url =
             "/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${fromCurrency}&to_currency=$toCurrency&apikey=$key"
-        val response = request(url)
-        if (response.statusCode() == 200 && !response.body().contains("Error Message")) {
-            return Parser.parseExchangeRateHTTPResponse(
-                response
-                    .body()
-                    .lines()
-            )
-        } else if (response.statusCode() != 200) {
-            throw FinanceException("Unsuccessful HTTP Request [$url]")
-        } else {
-            throw FinanceException("Unsuccessful API Request [$url]: ${response.body()}")
-        }
+        return Parser.parseExchangeRateHTTPResponse(request(url))
     }
 
     fun getIndicatorData(
@@ -89,19 +65,8 @@ object Requester {
         params: Map<String, String>
     ): MutableList<IndicatorQuote> {
         val url =
-            "/query?function=$symbol&symbol=$stockSymbol&interval=${interval.formatted}${mapToQueryString(params)}&apikey=$key&datatype=csv"
-        val response = request(url)
-        if (response.statusCode() == 200 && !response.body().contains("Error Message")) {
-            return Parser.parseIndicatorHTTPResponse(
-                response
-                    .body()
-                    .lines()
-            )
-        } else if (response.statusCode() != 200) {
-            throw FinanceException("Unsuccessful HTTP Request [$url]")
-        } else {
-            throw FinanceException("Unsuccessful API Request [$url]: ${response.body()}")
-        }
+            "/query?function=$symbol&symbol=$stockSymbol&interval=${interval.formatted}&${mapToQueryString(params)}&apikey=$key&datatype=csv"
+        return Parser.parseIndicatorHTTPResponse(request(url))
     }
 
     private fun mapToQueryString(map: Map<String, String>): String {
@@ -112,4 +77,8 @@ object Requester {
         return sb.toString().dropLast(1)
     }
 
+    fun getCryptoData(symbol: String, market: String, scope: Scope): MutableList<HistoricalQuote> {
+        val url = "/query?function=${scope.cryptoFormatted}&symbol=${symbol}&market=$market&apikey=$key&datatype=csv"
+        return Parser.parseHistoryHTTPResponse(request(url))
+    }
 }

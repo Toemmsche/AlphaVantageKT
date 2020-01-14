@@ -1,4 +1,4 @@
-package kotlin.enums
+package alphavantagekt.enums
 
 enum class IndicatorInterval(val formatted : String) {
     ONE_MINUTE("1min"),
@@ -6,7 +6,7 @@ enum class IndicatorInterval(val formatted : String) {
     FIFTEEN_MINUTES("15min"),
     THIRTY_MINUTES("30min"),
     ONE_HOUR("60min"),
-    DAIL("daily"),
+    DAILY("daily"),
     WEEKLY("weekly"),
     MONTHLY("monthly")
 }

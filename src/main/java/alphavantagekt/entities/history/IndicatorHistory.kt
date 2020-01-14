@@ -1,9 +1,11 @@
-package main.java.kotlin.entities.history
+package alphavantagekt.entities.history
 
-import main.java.kotlin.alphavantage.Requester
-import main.java.kotlin.entities.Stock
-import kotlin.entities.quote.IndicatorQuote
-import kotlin.enums.IndicatorInterval
+import alphavantagekt.alphavantage.Requester
+import alphavantagekt.entities.Stock
+import alphavantagekt.entities.quote.HistoricalQuote
+
+import alphavantagekt.entities.quote.IndicatorQuote
+import alphavantagekt.enums.IndicatorInterval
 
 class IndicatorHistory(
     val symbol: String,
@@ -12,7 +14,7 @@ class IndicatorHistory(
     var data: MutableList<IndicatorQuote> = ArrayList<IndicatorQuote>()
 ) : MutableList<IndicatorQuote> by data {
 
-    constructor(symbol: String,underlyingStock: Stock, interval: IndicatorInterval, params: Map<String, String>) : this(
+    constructor(symbol: String, underlyingStock: Stock, interval: IndicatorInterval, params: Map<String, String>) : this(
         symbol,
         underlyingStock,
         interval
@@ -21,9 +23,19 @@ class IndicatorHistory(
 
     }
 
-    fun update(params: Map<String, String>): Boolean {
+    override fun toString() : String {
+        val sb = StringBuilder()
+        sb.append("indicator: $symbol, stock=${underlyingStock.symbol}, interval=${interval.formatted}\n")
+        for (q in data) {
+            sb.append("$q\n")
+        }
+        sb.dropLast(2)
+        return sb.toString()
+    }
+
+    fun update(params: Map<String, String>): IndicatorHistory{
         data = Requester.getIndicatorData(symbol, underlyingStock.symbol, interval, params)
-        return true
+        return this
     }
 
 }

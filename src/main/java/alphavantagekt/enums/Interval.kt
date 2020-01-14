@@ -1,4 +1,4 @@
-package main.java.kotlin.enums
+package alphavantagekt.enums
 
 enum class Interval(val formatted : String) {
     ONE_MINUTE("1min"),

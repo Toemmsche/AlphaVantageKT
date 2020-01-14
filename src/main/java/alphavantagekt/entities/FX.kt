@@ -1,7 +1,8 @@
-package main.java.kotlin.entities
+package alphavantagekt.entities
 
-import main.java.kotlin.entities.history.FXHistory
-import main.java.kotlin.enums.Scope
+import alphavantagekt.entities.history.FXHistory
+import alphavantagekt.enums.Scope
+
 
 class FX(
     val fromSymbol : String,

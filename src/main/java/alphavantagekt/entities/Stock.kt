@@ -1,7 +1,10 @@
-package main.java.kotlin.entities
+package alphavantagekt.entities
 
-import main.java.kotlin.entities.history.ShareHistory
-import main.java.kotlin.enums.Scope
+import alphavantagekt.entities.history.IndicatorHistory
+import alphavantagekt.entities.history.ShareHistory
+import alphavantagekt.enums.IndicatorInterval
+import alphavantagekt.enums.Scope
+
 
 /**
  * Represents a stock, whose underlying will be requested from the API on-demond, NOT on creation.
@@ -36,4 +39,6 @@ class Stock(
             return field
         }
 
+    fun getIndicator(symbol : String, interval : IndicatorInterval, params: Map<String, String>) : IndicatorHistory =
+        IndicatorHistory(symbol, this, interval, params)
 }
