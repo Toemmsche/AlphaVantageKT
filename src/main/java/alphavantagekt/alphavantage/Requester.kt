@@ -9,6 +9,8 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import kotlin.entities.quote.IndicatorQuote
+import kotlin.enums.IndicatorInterval
 
 object Requester {
 
@@ -24,7 +26,7 @@ object Requester {
     }
 
     fun getShareData(symbol: String, scope: Scope, interval: Interval?): MutableList<HistoricalQuote> {
-        val url = "/query?function=${scope.ShareFormatted}&symbol=${symbol}&interval=${interval?.formatted
+        val url = "/query?function=${scope.shareFormatted}&symbol=${symbol}&interval=${interval?.formatted
             ?: "5min"}&apikey=$key&datatype=csv"
         val response = request(url)
         if (response.statusCode() == 200 && !response.body().contains("Error Message")) {
@@ -40,7 +42,12 @@ object Requester {
         }
     }
 
-    fun getFXData(fromSymbol: String, toSymbol: String, scope: Scope, interval: Interval?): MutableList<HistoricalQuote> {
+    fun getFXData(
+        fromSymbol: String,
+        toSymbol: String,
+        scope: Scope,
+        interval: Interval?
+    ): MutableList<HistoricalQuote> {
         val url =
             "/query?function=${scope.FXFormatted}&from_symbol=${fromSymbol}&to_symbol=$toSymbol&interval=${interval?.formatted
                 ?: "5min"}&apikey=$key&datatype=csv"
@@ -59,11 +66,50 @@ object Requester {
     }
 
     fun getExchangeRate(fromCurrency: String, toCurrency: String): ExchangeQuote {
-        return Parser.parseExchangeRateHTTPResponse(
-            request("/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${fromCurrency}&to_currency=$toCurrency&apikey=$key")
-                .body()
-                .lines()
-        )
+        val url =
+            "/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${fromCurrency}&to_currency=$toCurrency&apikey=$key"
+        val response = request(url)
+        if (response.statusCode() == 200 && !response.body().contains("Error Message")) {
+            return Parser.parseExchangeRateHTTPResponse(
+                response
+                    .body()
+                    .lines()
+            )
+        } else if (response.statusCode() != 200) {
+            throw FinanceException("Unsuccessful HTTP Request [$url]")
+        } else {
+            throw FinanceException("Unsuccessful API Request [$url]: ${response.body()}")
+        }
+    }
+
+    fun getIndicatorData(
+        symbol: String,
+        stockSymbol: String,
+        interval: IndicatorInterval,
+        params: Map<String, String>
+    ): MutableList<IndicatorQuote> {
+        val url =
+            "/query?function=$symbol&symbol=$stockSymbol&interval=${interval.formatted}${mapToQueryString(params)}&apikey=$key&datatype=csv"
+        val response = request(url)
+        if (response.statusCode() == 200 && !response.body().contains("Error Message")) {
+            return Parser.parseIndicatorHTTPResponse(
+                response
+                    .body()
+                    .lines()
+            )
+        } else if (response.statusCode() != 200) {
+            throw FinanceException("Unsuccessful HTTP Request [$url]")
+        } else {
+            throw FinanceException("Unsuccessful API Request [$url]: ${response.body()}")
+        }
+    }
+
+    private fun mapToQueryString(map: Map<String, String>): String {
+        val sb = StringBuilder()
+        for (entry in map.entries) {
+            sb.append("${entry.key}=${entry.value}&")
+        }
+        return sb.toString().dropLast(1)
     }
 
 }

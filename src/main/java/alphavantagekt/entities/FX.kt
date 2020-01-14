@@ -10,25 +10,25 @@ class FX(
 
     //Historical data
     override val intradayHistory: FXHistory =
-        FXHistory(fromSymbol, toSymbol, Scope.INTRADAY)
+        FXHistory(this, Scope.INTRADAY)
         get() : FXHistory {
             field.fetch()
             return field
         }
     override val dailyHistory: FXHistory =
-        FXHistory(fromSymbol, toSymbol, Scope.DAILY)
+        FXHistory(this, Scope.DAILY)
         get() : FXHistory {
             field.fetch()
             return field
         }
     override val weeklyHistory: FXHistory =
-        FXHistory(fromSymbol, toSymbol, Scope.WEEKLY)
+        FXHistory(this, Scope.WEEKLY)
         get() : FXHistory {
             field.fetch()
             return field
         }
     override val monthlyHistory: FXHistory =
-        FXHistory(fromSymbol, toSymbol, Scope.MONTHLY)
+        FXHistory(this, Scope.MONTHLY)
         get() : FXHistory {
             field.fetch()
             return field

@@ -6,6 +6,7 @@ import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.entities.quote.IndicatorQuote
 
 object Parser {
 
@@ -26,7 +27,6 @@ object Parser {
         val arr = line.split(",")
 
         //Only intraday quotes have an hour attached to them
-
         lateinit var date: Date
         try {
             date = sdfWithTime.parse(arr[0])
@@ -54,8 +54,8 @@ object Parser {
         lateinit var fromCode: String
         lateinit var toCode: String
         var rate: Double = 0.0
-        var bid: Double= 0.0
-        var ask: Double= 0.0
+        var bid: Double = 0.0
+        var ask: Double = 0.0
 
         for (line in response) {
             if (!line.contains(":")) continue
@@ -83,6 +83,30 @@ object Parser {
         }
 
         return ExchangeQuote(timestamp, fromCode, toCode, rate, bid, ask)
+    }
+
+    fun parseIndicatorHTTPResponse(response: List<String>): MutableList<IndicatorQuote> {
+        val quotes = ArrayList<IndicatorQuote>()
+        for (line in response) {
+            parseIndicatorCSVLine(line)?.also { quotes.add(it) }
+        }
+        return quotes
+    }
+
+    private fun parseIndicatorCSVLine(line: String): IndicatorQuote? {
+        if (!line.contains(",") || line.startsWith("timestamp")) return null
+
+        val arr = line.split(",")
+
+        //Only intraday quotes have an hour attached to them
+        lateinit var date: Date
+        try {
+            date = sdfWithTime.parse(arr[0])
+        } catch (e: Exception) {
+            date = sdfDaysOnly.parse(arr[0])
+        }
+        val value = arr[1].toDouble()
+        return IndicatorQuote(date, value)
     }
 
 }

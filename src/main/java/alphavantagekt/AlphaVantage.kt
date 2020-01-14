@@ -9,6 +9,6 @@ fun provideKey(key : String) {
 
 fun main() {
     provideKey("CSE3RJSJLAVEG0HL")
-    println(Currency("GBP").convertTo(Currency("USD")))
+    println(Currency("USD").convertTo(Currency("EUR")))
     println(Currency("CAD").convertFrom(Currency("CHF")))
 }
