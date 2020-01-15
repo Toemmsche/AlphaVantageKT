@@ -19,7 +19,6 @@ class CryptoHistory(
 
     override fun update(interval: Interval) : CryptoHistory {
         throw UnsupportedOperationException("Parameter 'interval' cannot be used for cryptocurrencies")
-        return this
     }
 
     override fun toString(): String {

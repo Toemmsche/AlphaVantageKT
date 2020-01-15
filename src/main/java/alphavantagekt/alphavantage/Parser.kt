@@ -10,6 +10,9 @@ import alphavantagekt.entities.quote.IndicatorQuote
 import java.net.http.HttpResponse
 import java.text.ParseException
 
+/**
+ *
+ */
 object Parser {
 
     val sdfWithTime = SimpleDateFormat("yyyy-MM-dd HH:mm:SS")
@@ -50,9 +53,9 @@ object Parser {
         try {
             //Cryptocurrency quotes also show the values in USD before volume
             if (arr.size > 6) {
-                volume = arr[9]?.toDouble()?.toLong()
+                volume = arr[9].toDouble().toLong()
             } else {
-                volume = arr[5]?.toDouble()?.toLong()
+                volume = arr[5].toDouble().toLong()
             }
         } catch (e: Exception) {
         }
