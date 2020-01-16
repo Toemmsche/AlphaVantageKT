@@ -1,6 +1,7 @@
-package alphavantagekt.alphavantage
+package alphavantagekt.connection
 
 import alphavantagekt.entities.quote.ExchangeQuote
+import alphavantagekt.entities.quote.GlobalQuote
 import alphavantagekt.entities.quote.HistoricalQuote
 
 import java.net.URI
@@ -140,6 +141,15 @@ object Requester {
     }
 
     /**
+     * @param symbol The stock ticker
+     * @return A custom quote object containing current data for the stock.
+     */
+    fun getGlobalQuote(symbol: String): GlobalQuote {
+        val query = "/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=$key&datatype=csv"
+        return Parser.parseGlobalQuoteHTTPResponse(request(query))
+    }
+
+    /**
      * A helper function to convert String maps to URL syntax.
      *
      * @param map The String map to be converted
@@ -162,10 +172,19 @@ object Requester {
     fun testKey(keyCandidate: String): Boolean {
         this.key = keyCandidate
         try {
-            val response = request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=5min&apikey=$key")
-            if (response.body().contains("Meta Data")) return true
-            else return false
-        } catch (e : Exception) {
+            val response =
+                request("/query?function=TIME_SERIES_INTRADAY&symbol=AMD&interval=5min&apikey=$key")
+            if (response.body().contains("Meta Data")
+                && !response.body().contains("the parameter apikey is invalid or missing")
+            ) {
+                return true
+            } else {
+                key = ""
+                return false
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            key = ""
             return false
         }
     }

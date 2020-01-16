@@ -1,44 +1,56 @@
 package alphavantagekt.entities
 
+import alphavantagekt.connection.Requester
 import alphavantagekt.entities.history.IndicatorHistory
-import alphavantagekt.entities.history.ShareHistory
+import alphavantagekt.entities.history.StockHistory
+import alphavantagekt.entities.quote.GlobalQuote
+import alphavantagekt.entities.quote.HistoricalQuote
 import alphavantagekt.enums.IndicatorInterval
 import alphavantagekt.enums.Scope
 
 
 /**
- * Represents a stock, whose underlying will be requested from the API on-demond, NOT on creation.
+ * The Asset subclass for a stock.
+ *
+ * @property symbol The stock ticker, e.g. AAPL.
+ * @property latestQuote A GlobalQuote object containing all current information about the Stock
  */
 class Stock(
     val symbol: String
-) : Trackable {
+) : Asset {
+
+    //Current data
+    var latestQuote: GlobalQuote
+        get() = Requester.getGlobalQuote(symbol)
+        private set(value) = Unit
 
     //Historical data
-    override val intradayHistory: ShareHistory =
-        ShareHistory(this, Scope.INTRADAY)
-        get() : ShareHistory {
+    override val intradayHistory: StockHistory =
+        StockHistory(this, Scope.INTRADAY)
+        get() : StockHistory {
             field.fetch()
             return field
         }
-    override val dailyHistory: ShareHistory =
-        ShareHistory(this, Scope.DAILY)
-        get() : ShareHistory {
+    override val dailyHistory: StockHistory =
+        StockHistory(this, Scope.DAILY)
+        get() : StockHistory {
             field.fetch()
             return field
         }
-    override val weeklyHistory: ShareHistory =
-        ShareHistory(this, Scope.WEEKLY)
-        get() : ShareHistory {
+    override val weeklyHistory: StockHistory =
+        StockHistory(this, Scope.WEEKLY)
+        get() : StockHistory {
             field.fetch()
             return field
         }
-    override val monthlyHistory: ShareHistory =
-        ShareHistory(this, Scope.MONTHLY)
-        get() :ShareHistory {
+    override val monthlyHistory: StockHistory =
+        StockHistory(this, Scope.MONTHLY)
+        get() :StockHistory {
             field.fetch()
             return field
         }
 
-    fun getIndicator(symbol : String, interval : IndicatorInterval, params: Map<String, String>) : IndicatorHistory =
-        IndicatorHistory(symbol, this, interval, params)
+    override fun toString(): String {
+        return symbol
+    }
 }

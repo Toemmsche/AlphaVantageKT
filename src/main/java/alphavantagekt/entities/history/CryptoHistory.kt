@@ -1,12 +1,14 @@
 package alphavantagekt.entities.history
 
-import alphavantagekt.alphavantage.Requester
+import alphavantagekt.connection.Requester
 import alphavantagekt.entities.Cryptocurrency
 import alphavantagekt.enums.Interval
 import alphavantagekt.enums.Scope
 import java.lang.UnsupportedOperationException
 
-
+/**
+ * The history subclass for a cryptocurrency.
+ */
 class CryptoHistory(
     override val underlyingAsset: Cryptocurrency,
     scope: Scope

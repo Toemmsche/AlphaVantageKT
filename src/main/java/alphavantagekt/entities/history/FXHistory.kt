@@ -1,13 +1,15 @@
 package alphavantagekt.entities.history
 
-import alphavantagekt.alphavantage.Requester
+import alphavantagekt.connection.Requester
 import alphavantagekt.entities.FX
-import alphavantagekt.entities.quote.HistoricalQuote
 import alphavantagekt.enums.Interval
 import alphavantagekt.enums.Scope
 import java.lang.UnsupportedOperationException
 
 
+/**
+ * The history subclass for a Foreign Exchange Pair (FX).
+ */
 class FXHistory(
     override val underlyingAsset: FX,
     scope: Scope

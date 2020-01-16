@@ -1,6 +1,7 @@
-package alphavantagekt.alphavantage
+package alphavantagekt.connection
 
 import alphavantagekt.entities.quote.ExchangeQuote
+import alphavantagekt.entities.quote.GlobalQuote
 import alphavantagekt.entities.quote.HistoricalQuote
 import java.lang.Exception
 import java.text.SimpleDateFormat
@@ -156,7 +157,7 @@ object Parser {
      * @param attributes The names of the attributes in the appearing order.
      * @return A custom quote object containing all the information of the datapoint.
      */
-    private fun parseIndicatorCSVLine(line: String, attributes : List<String>): IndicatorQuote? {
+    private fun parseIndicatorCSVLine(line: String, attributes: List<String>): IndicatorQuote? {
         if (!line.contains(",") || line.startsWith("time")) return null
 
         val arr = line.split(",")
@@ -179,6 +180,33 @@ object Parser {
         }
 
         return IndicatorQuote(date, map)
+    }
+
+    /**
+     * Parses the response of a request made to retrieve current data about a stock.
+     *
+     * @param response The HTTP response from AlphaVantage.
+     * @return A GlobalQuote object containing all the current information about the stock.
+     */
+    fun parseGlobalQuoteHTTPResponse(response: HttpResponse<String>): GlobalQuote {
+        //The csv file only contains two lines, the header and the one containing the values.
+        val arr = response
+            .body()
+            .lines()[1]
+            .split(",")
+        return GlobalQuote(
+            arr[0],
+            arr[1].toDouble(),
+            arr[2].toDouble(),
+            arr[3].toDouble(),
+            arr[4].toDouble(),
+            arr[5].toLong(),
+            sdfDaysOnly.parse(arr[6]),
+            arr[7].toDouble(),
+            arr[8].toDouble(),
+            //percentageChange has '%' symbol at the end
+            arr[9].dropLast(1).toDouble()
+        )
     }
 
 }
