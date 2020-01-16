@@ -12,29 +12,35 @@ import alphavantagekt.enums.IndicatorInterval
 import alphavantagekt.enums.Interval
 import alphavantagekt.enums.Scope
 import alphavantagekt.exceptions.FinanceException
+import alphavantagekt.exceptions.MissingApiKeyException
+import java.lang.Exception
 
 /**
- * An object for communication with the API server.
+ * An object for communication with the Alphavantage API server.
  *
  * Sends HTTP requests to the Alphavantage server and passes the responses to @see Parser.
  *
- * @property key The API key required for performing API requests. Can be retrieved from https://www.alphavantage.co/support/#api-key
+ * @property key The API key required for performing API requests.
+ *              Can be retrieved from https://www.alphavantage.co/support/#api-key
  * @property host The host URL address of the Alphavantage API.
  */
 object Requester {
 
     lateinit var key: String
-    val host = "https://www.alphavantage.co"
+    private val host = "https://www.alphavantage.co"
 
     /**
      * Sends a HTTPRequest to the Alphavantage server.
      *
      * @param query The query formatted as URL Parameters which will be appended to the host address.
-     * @throws FinanceException When the HTTP request was unsuccessful.
      * @return The Response sent by Alphavantage.
+     *
+     * @throws FinanceException When the HTTP request was unsuccessful.
+     * @throws MissingApiKeyException If no key is provided at the time of the request.
      */
-    @Throws(FinanceException::class)
+    @Throws(FinanceException::class, MissingApiKeyException::class)
     private fun request(query: String): HttpResponse<String> {
+        if (key.isNullOrBlank()) throw MissingApiKeyException()
         val client = HttpClient.newHttpClient()
         val request = HttpRequest
             .newBuilder(URI(host + query))
@@ -43,8 +49,10 @@ object Requester {
         if (response.statusCode() == 200 && !response.body().contains("Error Message")) {
             return response
         } else if (response.statusCode() != 200) {
+            //Request was not understood by the server or the request was bad
             throw FinanceException("Unsuccessful HTTP Request [$query]")
         } else {
+            //The request could not be interpreted by the server.
             throw FinanceException("Unsuccessful API Request [$query]: ${response.body()}")
         }
     }
@@ -59,9 +67,9 @@ object Requester {
      *
      */
     fun getShareData(symbol: String, scope: Scope, interval: Interval?): MutableList<HistoricalQuote> {
-        val url = "/query?function=${scope.shareFormatted}&symbol=${symbol}&interval=${interval?.formatted
+        val query = "/query?function=${scope.stockFormatted}&symbol=${symbol}&interval=${interval?.formatted
             ?: "5min"}&apikey=$key&datatype=csv"
-        return Parser.parseHistoryHTTPResponse(request(url))
+        return Parser.parseHistoryHTTPResponse(request(query))
     }
 
     /**
@@ -79,11 +87,11 @@ object Requester {
         scope: Scope,
         interval: Interval?
     ): MutableList<HistoricalQuote> {
-        val url =
+        val query =
             "/query?function=${scope.FXFormatted}&from_symbol=${fromSymbol}&to_symbol=$toSymbol&interval=${interval?.formatted
                 ?: "5min"}&apikey=$key&datatype=csv"
 
-        return Parser.parseHistoryHTTPResponse(request(url))
+        return Parser.parseHistoryHTTPResponse(request(query))
     }
 
     /**
@@ -94,28 +102,28 @@ object Requester {
      * @return An ExchangeQuote Object containing all the relevant and current data of the currency pair
      */
     fun getExchangeRate(fromCurrency: String, toCurrency: String): ExchangeQuote {
-        val url =
+        val query =
             "/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${fromCurrency}&to_currency=$toCurrency&apikey=$key"
-        return Parser.parseExchangeRateHTTPResponse(request(url))
+        return Parser.parseExchangeRateHTTPResponse(request(query))
     }
 
     /**
-     * Returns historical data of an indicator for an underlying stock.
+     * Returns historical data of an indicator for an underlying security.
      *
      * @param symbol The indicator symbol, e.g. SMA (Simple Moving Average).
-     * @param stockSymbol The ticker of the underlying stock, e.g. AAPL.
+     * @param securitySymbol The ticker of the underlying security, e.g. AAPL, USDEUR or BTC
      * @param interval The interval between datapoints.
      * @param params A map of parameters for the api call, some of which might be required for certain indicators
      */
     fun getIndicatorData(
         symbol: String,
-        stockSymbol: String,
+        securitySymbol: String,
         interval: IndicatorInterval,
         params: Map<String, String>
     ): MutableList<IndicatorQuote> {
-        val url =
-            "/query?function=$symbol&symbol=$stockSymbol&interval=${interval.formatted}&${mapToQueryString(params)}&apikey=$key&datatype=csv"
-        return Parser.parseIndicatorHTTPResponse(request(url))
+        val query =
+            "/query?function=$symbol&symbol=$securitySymbol&interval=${interval.formatted}&${mapToQueryString(params)}&apikey=$key&datatype=csv"
+        return Parser.parseIndicatorHTTPResponse(request(query))
     }
 
     /**
@@ -127,8 +135,8 @@ object Requester {
      * @returns The datapoints in the format of historical quotes.
      */
     fun getCryptoData(symbol: String, market: String, scope: Scope): MutableList<HistoricalQuote> {
-        val url = "/query?function=${scope.cryptoFormatted}&symbol=${symbol}&market=$market&apikey=$key&datatype=csv"
-        return Parser.parseHistoryHTTPResponse(request(url))
+        val query = "/query?function=${scope.cryptoFormatted}&symbol=${symbol}&market=$market&apikey=$key&datatype=csv"
+        return Parser.parseHistoryHTTPResponse(request(query))
     }
 
     /**
@@ -144,4 +152,22 @@ object Requester {
         }
         return sb.toString().dropLast(1)
     }
+
+    /**
+     * A method to test an API key for validity.
+     *
+     * @param key The API key candidate to be tested.
+     * @return If the API key is valid, i.e. if the test request succeeded.
+     */
+    fun testKey(keyCandidate: String): Boolean {
+        this.key = keyCandidate
+        try {
+            val response = request("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=5min&apikey=$key")
+            if (response.body().contains("Meta Data")) return true
+            else return false
+        } catch (e : Exception) {
+            return false
+        }
+    }
+
 }

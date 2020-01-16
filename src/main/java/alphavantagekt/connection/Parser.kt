@@ -9,18 +9,32 @@ import kotlin.collections.ArrayList
 import alphavantagekt.entities.quote.IndicatorQuote
 import java.net.http.HttpResponse
 import java.text.ParseException
+import kotlin.collections.HashMap
 
 /**
+ *  An object for parsing HTTP responses from the AlphaVantage API server.
  *
+ * Receives HTTP responses from @see Requester and parses the content into objects.
+ * Only supports the csv datatype so far.
+ *
+ * @property sdfWithTime A date format with the date and time.
+ * @property sdfWithoutSeconds A date format with the date as well as hours and minutes.
+ * @property sdfDaysOnly A date format with the date.
+ * @property dateFormats Contains all date formats to be iterated through.
  */
 object Parser {
 
-    val sdfWithTime = SimpleDateFormat("yyyy-MM-dd HH:mm:SS")
-    val sdfWithOutSeconds = SimpleDateFormat("yyyy-MM-dd HH:mm")
-    val sdfDaysOnly = SimpleDateFormat("yyyy-MM-dd")
+    private val sdfWithTime = SimpleDateFormat("yyyy-MM-dd HH:mm:SS")
+    private val sdfWithOutSeconds = SimpleDateFormat("yyyy-MM-dd HH:mm")
+    private val sdfDaysOnly = SimpleDateFormat("yyyy-MM-dd")
+    private val dateFormats = listOf<SimpleDateFormat>(sdfWithTime, sdfWithOutSeconds, sdfDaysOnly)
 
-    val dateFormats = listOf<SimpleDateFormat>(sdfWithTime, sdfWithOutSeconds, sdfDaysOnly)
-
+    /**
+     * Parses the response of a request made to retrieve historical data about an asset.
+     *
+     * @param response The HTTP response received from AlphaVantage
+     * @return The historical datapoints contained in the body of the response
+     */
     fun parseHistoryHTTPResponse(response: HttpResponse<String>): MutableList<HistoricalQuote> {
         val lines = response.body().lines()
         val quotes = ArrayList<HistoricalQuote>()
@@ -30,6 +44,12 @@ object Parser {
         return quotes
     }
 
+    /**
+     * Parses a single csv line containing one historical datapoint for an asset.
+     *
+     * @param line The line to be parsed.
+     * @return A custom quote containing all the information of the datapoint.
+     */
     private fun parseHistoryCSVLine(line: String): HistoricalQuote? {
         if (!line.contains(",") || line.startsWith("time")) return null
 
@@ -63,6 +83,12 @@ object Parser {
         return HistoricalQuote(date, open, high, low, close, volume)
     }
 
+    /**
+     * Parses the response of a request made to retrieve data about the exchange rate between to currencies.
+     *
+     * @param response The HTTP response received from AlphaVantage.
+     * @return The contents of the body wrapped in a custom quote object.
+     */
     fun parseExchangeRateHTTPResponse(response: HttpResponse<String>): ExchangeQuote {
         val lines = response.body().lines()
 
@@ -76,6 +102,9 @@ object Parser {
         for (line in lines) {
             if (!line.contains(":")) continue
             val uf = line.split(":".toRegex(), 2)[1]
+
+            /*  The exchange rate request always returns json, so a bit of brute forcing is required to avoid
+                the usage of a json parser, which would only be required for this specific task. */
             when {
                 line.contains("1. From_Currency Code") -> {
                     fromCode = uf.substring(uf.indexOf('"') + 1, uf.lastIndexOf('"'))
@@ -97,21 +126,37 @@ object Parser {
                 }
             }
         }
-
         return ExchangeQuote(timestamp, fromCode, toCode, rate, bid, ask)
     }
 
+    /**
+     * Parses the response of a request made to retrieve data about an indicator for an underlying security.
+     *
+     * @param response The HTTP response received from AlphaVantage
+     * @return The historical datapoints contained in the body of the response
+     */
     fun parseIndicatorHTTPResponse(response: HttpResponse<String>): MutableList<IndicatorQuote> {
         val lines = response.body().lines()
         val quotes = ArrayList<IndicatorQuote>()
-        for (line in lines) {
-            parseIndicatorCSVLine(line)?.also { quotes.add(it) }
+
+        //Different indicators have different amounts of information per datapoint.
+        //The header is needed to filter out the obtain the attributes.
+        val attributes = lines[0].split(",").toList()
+        for (line in lines.subList(1, lines.size)) {
+            parseIndicatorCSVLine(line, attributes)?.also { quotes.add(it) }
         }
+
         return quotes
     }
 
-    private fun parseIndicatorCSVLine(line: String): IndicatorQuote? {
-        println(line)
+    /**
+     * Parses a single csv line dontaining one historical datapoint for an indicator.
+     *
+     * @param line The line to be parsed.
+     * @param attributes The names of the attributes in the appearing order.
+     * @return A custom quote object containing all the information of the datapoint.
+     */
+    private fun parseIndicatorCSVLine(line: String, attributes : List<String>): IndicatorQuote? {
         if (!line.contains(",") || line.startsWith("time")) return null
 
         val arr = line.split(",")
@@ -125,8 +170,15 @@ object Parser {
             } catch (e: ParseException) {
             }
         }
-        val value = arr[1].toDouble()
-        return IndicatorQuote(date, value)
+
+        //Different indicators have different amounts of information per datapoint.
+        val map = HashMap<String, Double>()
+        //timestamp was already parsed
+        for (i in 1..attributes.lastIndex) {
+            map.put(attributes[i], arr[i].toDouble())
+        }
+
+        return IndicatorQuote(date, map)
     }
 
 }
