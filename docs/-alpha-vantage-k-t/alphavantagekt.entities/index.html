@@ -1,0 +1,57 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>alphavantagekt.entities - AlphaVantageKT</title>
+<link rel="stylesheet" href="../../style.css">
+</HEAD>
+<BODY>
+<a href="../index.html">AlphaVantageKT</a>&nbsp;/&nbsp;<a href="./index.html">alphavantagekt.entities</a><br/>
+<br/>
+<h2>Package alphavantagekt.entities</h2>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="-asset/index.html">Asset</a></h4>
+</td>
+<td>
+<p>A common interface for all assets that are publicly traded.</p>
+<code><span class="keyword">interface </span><span class="identifier">Asset</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="-cryptocurrency/index.html">Cryptocurrency</a></h4>
+</td>
+<td>
+<p>The Asset sublcass for a cryptocurrency.</p>
+<code><span class="keyword">class </span><span class="identifier">Cryptocurrency</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-asset/index.html"><span class="identifier">Asset</span></a><span class="symbol">, </span><a href="-currency/index.html"><span class="identifier">Currency</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="-currency/index.html">Currency</a></h4>
+</td>
+<td>
+<p>An extendable class for a real-word currency. This class doesn't store the currency amount is only used for API calls.</p>
+<code><span class="keyword">open</span> <span class="keyword">class </span><span class="identifier">Currency</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="-f-x/index.html">FX</a></h4>
+</td>
+<td>
+<p>The Asset subclass for a Foreign Exchange Pair (FX).</p>
+<code><span class="keyword">class </span><span class="identifier">FX</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-asset/index.html"><span class="identifier">Asset</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="-stock/index.html">Stock</a></h4>
+</td>
+<td>
+<p>The Asset subclass for a stock.</p>
+<code><span class="keyword">class </span><span class="identifier">Stock</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-asset/index.html"><span class="identifier">Asset</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

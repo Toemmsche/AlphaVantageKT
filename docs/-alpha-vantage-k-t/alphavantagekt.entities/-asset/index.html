@@ -1,0 +1,99 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Asset - AlphaVantageKT</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">AlphaVantageKT</a>&nbsp;/&nbsp;<a href="../index.html">alphavantagekt.entities</a>&nbsp;/&nbsp;<a href="./index.html">Asset</a><br/>
+<br/>
+<h1>Asset</h1>
+<code><span class="keyword">interface </span><span class="identifier">Asset</span></code>
+<p>A common interface for all assets that are publicly traded.</p>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="daily-history.html">dailyHistory</a></h4>
+</td>
+<td>
+<p>The historical data containing one datapoint for each day.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">dailyHistory</span><span class="symbol">: </span><a href="../../alphavantagekt.entities.history/-history/index.html"><span class="identifier">History</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="intraday-history.html">intradayHistory</a></h4>
+</td>
+<td>
+<p>The historical data for the current day.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">intradayHistory</span><span class="symbol">: </span><a href="../../alphavantagekt.entities.history/-history/index.html"><span class="identifier">History</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="monthly-history.html">monthlyHistory</a></h4>
+</td>
+<td>
+<p>The historical data containing one datapoint for each month.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">monthlyHistory</span><span class="symbol">: </span><a href="../../alphavantagekt.entities.history/-history/index.html"><span class="identifier">History</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="weekly-history.html">weeklyHistory</a></h4>
+</td>
+<td>
+<p>The historical data containing one datapoint for each week.</p>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">weeklyHistory</span><span class="symbol">: </span><a href="../../alphavantagekt.entities.history/-history/index.html"><span class="identifier">History</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="get-indicator.html">getIndicator</a></h4>
+</td>
+<td>
+<code><span class="keyword">open</span> <span class="keyword">fun </span><span class="identifier">getIndicator</span><span class="symbol">(</span><span class="identifier" id="alphavantagekt.entities.Asset$getIndicator(kotlin.String, alphavantagekt.enums.IndicatorInterval, kotlin.collections.Map((kotlin.String, )))/symbol">symbol</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="alphavantagekt.entities.Asset$getIndicator(kotlin.String, alphavantagekt.enums.IndicatorInterval, kotlin.collections.Map((kotlin.String, )))/interval">interval</span><span class="symbol">:</span>&nbsp;<a href="../../alphavantagekt.enums/-indicator-interval/index.html"><span class="identifier">IndicatorInterval</span></a><span class="symbol">, </span><span class="identifier" id="alphavantagekt.entities.Asset$getIndicator(kotlin.String, alphavantagekt.enums.IndicatorInterval, kotlin.collections.Map((kotlin.String, )))/params">params</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="../../alphavantagekt.entities.history/-indicator-history/index.html"><span class="identifier">IndicatorHistory</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="to-string.html">toString</a></h4>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">toString</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Inheritors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="../-cryptocurrency/index.html">Cryptocurrency</a></h4>
+</td>
+<td>
+<p>The Asset sublcass for a cryptocurrency.</p>
+<code><span class="keyword">class </span><span class="identifier">Cryptocurrency</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">Asset</span></a><span class="symbol">, </span><a href="../-currency/index.html"><span class="identifier">Currency</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="../-f-x/index.html">FX</a></h4>
+</td>
+<td>
+<p>The Asset subclass for a Foreign Exchange Pair (FX).</p>
+<code><span class="keyword">class </span><span class="identifier">FX</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">Asset</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="../-stock/index.html">Stock</a></h4>
+</td>
+<td>
+<p>The Asset subclass for a stock.</p>
+<code><span class="keyword">class </span><span class="identifier">Stock</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">Asset</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>
