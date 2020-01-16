@@ -25,11 +25,21 @@ import kotlin.collections.HashMap
  */
 object Parser {
 
-    private val sdfWithTime = SimpleDateFormat("yyyy-MM-dd HH:mm:SS")
-    private val sdfWithOutSeconds = SimpleDateFormat("yyyy-MM-dd HH:mm")
-    private val sdfDaysOnly = SimpleDateFormat("yyyy-MM-dd")
-    private val dateFormats = listOf<SimpleDateFormat>(sdfWithTime, sdfWithOutSeconds, sdfDaysOnly)
 
+
+    private val sdfWithTime =
+        SimpleDateFormat("yyyy-MM-dd HH:mm:SS").also { it.timeZone = TimeZone.getTimeZone("UTC") }
+    private val sdfWithoutSeconds =
+        SimpleDateFormat("yyyy-MM-dd HH:mm").also { it.timeZone = TimeZone.getTimeZone("UTC") }
+    private val sdfDaysOnly =
+        SimpleDateFormat("yyyy-MM-dd").also { it.timeZone = TimeZone.getTimeZone("UTC") }
+    private val dateFormats = listOf<SimpleDateFormat>(sdfWithTime, sdfWithoutSeconds, sdfDaysOnly)
+
+    init {
+        sdfDaysOnly.timeZone = TimeZone.getTimeZone("UTC")
+        sdfWithTime.timeZone = TimeZone.getTimeZone("UTC")
+        sdfWithoutSeconds.timeZone = TimeZone.getTimeZone("UTC")
+    }
     /**
      * Parses the response of a request made to retrieve historical data about an asset.
      *
@@ -96,9 +106,9 @@ object Parser {
         lateinit var timestamp: Date
         lateinit var fromCode: String
         lateinit var toCode: String
-        var rate: Double = 0.0
-        var bid: Double = 0.0
-        var ask: Double = 0.0
+        var rate = 0.0
+        var bid = 0.0
+        var ask = 0.0
 
         for (line in lines) {
             if (!line.contains(":")) continue

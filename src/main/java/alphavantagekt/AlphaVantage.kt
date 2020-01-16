@@ -1,7 +1,8 @@
 package alphavantagekt
 
 import alphavantagekt.connection.Requester
-import alphavantagekt.entities.Stock
+import alphavantagekt.entities.FX
+import alphavantagekt.enums.IndicatorInterval
 
 /**
  * A method for providing the Requester with an API key.
@@ -17,5 +18,6 @@ fun provideKey(key : String) : Boolean {
 fun main() {
     println(provideKey("CSE3RJSJLAVEG0HL"))
     //Requester.key = "CSE3RJSJLAVEG0HL"
-    println(Stock("AMD").latestQuote)
+    //println(Stock("AMD").latestQuote)
+    FX("EUR", "USD").getIndicator("MAMA", IndicatorInterval.FIFTEEN_MINUTES, mapOf("series_type" to "5")).also { println(it) }
 }
