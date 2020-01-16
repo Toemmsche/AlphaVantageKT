@@ -33,7 +33,6 @@ class IndicatorHistory(
         interval
     ) {
         update(params)
-
     }
 
     /**

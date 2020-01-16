@@ -35,11 +35,6 @@ object Parser {
         SimpleDateFormat("yyyy-MM-dd").also { it.timeZone = TimeZone.getTimeZone("UTC") }
     private val dateFormats = listOf<SimpleDateFormat>(sdfWithTime, sdfWithoutSeconds, sdfDaysOnly)
 
-    init {
-        sdfDaysOnly.timeZone = TimeZone.getTimeZone("UTC")
-        sdfWithTime.timeZone = TimeZone.getTimeZone("UTC")
-        sdfWithoutSeconds.timeZone = TimeZone.getTimeZone("UTC")
-    }
     /**
      * Parses the response of a request made to retrieve historical data about an asset.
      *
