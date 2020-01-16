@@ -9,6 +9,7 @@ import alphavantagekt.enums.Scope
  *
  * @property fromSymbol The currency that is converted from.
  * @property toSymbol The currency that is converted to.
+ * @property latestRate An ExchangeQuote object containing data about the current exchange rate between the two currencies.
  */
 class FX(
     val fromSymbol : String,
