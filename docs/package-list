@@ -1,10 +1,10 @@
 $dokka.format:html
 $dokka.linkExtension:html
 
-alphavantagekt
-alphavantagekt.connection
-alphavantagekt.entities
-alphavantagekt.entities.history
-alphavantagekt.entities.quote
-alphavantagekt.enums
-alphavantagekt.exceptions
+org.toemmsche.alphavantagekt
+org.toemmsche.alphavantagekt.connection
+org.toemmsche.alphavantagekt.entities
+org.toemmsche.alphavantagekt.entities.history
+org.toemmsche.alphavantagekt.entities.quote
+org.toemmsche.alphavantagekt.enums
+org.toemmsche.alphavantagekt.exceptions

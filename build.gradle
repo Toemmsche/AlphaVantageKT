@@ -1,4 +1,8 @@
-
+buildscript {
+    dependencies {
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
+    }
+}
 
 plugins {
     id 'java'
@@ -14,6 +18,9 @@ sourceCompatibility = 1.8
 repositories {
     mavenCentral()
     jcenter()
+    maven {
+        url  "https://dl.bintray.com/toemmsche/maven"
+    }
 }
 
 tasks {

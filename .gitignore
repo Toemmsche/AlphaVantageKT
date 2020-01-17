@@ -1,7 +1,6 @@
 # Project exclude paths
 /out/
 /.gradle/
-/gradle/
 /build/
 
 # Private files
