@@ -19,7 +19,7 @@ class IndicatorHistory(
     val symbol: String,
     val underlyingSecurity: Asset,
     val interval: IndicatorInterval,
-    var data: MutableList<IndicatorQuote> = ArrayList<IndicatorQuote>()
+    val data: MutableList<IndicatorQuote> = ArrayList<IndicatorQuote>()
 ) : MutableList<IndicatorQuote> by data {
 
     /**
@@ -56,7 +56,8 @@ class IndicatorHistory(
      *  @return An IndicatorHistory object containing the newly retrieved data (most often this object itself).
      */
     fun update(params: Map<String, String>): IndicatorHistory{
-        data = Requester.getIndicatorData(symbol, underlyingSecurity.toString(), interval, params)
+        data.clear()
+        data.addAll(Requester.getIndicatorData(symbol, underlyingSecurity.toString(), interval, params))
         return this
     }
 

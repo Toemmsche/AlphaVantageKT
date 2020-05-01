@@ -1,0 +1,10 @@
+$dokka.format:html
+$dokka.linkExtension:html
+
+org.toemmsche.alphavantagekt
+org.toemmsche.alphavantagekt.connection
+org.toemmsche.alphavantagekt.entities
+org.toemmsche.alphavantagekt.entities.history
+org.toemmsche.alphavantagekt.entities.quote
+org.toemmsche.alphavantagekt.enums
+org.toemmsche.alphavantagekt.exceptions

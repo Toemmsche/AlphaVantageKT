@@ -25,8 +25,6 @@ import kotlin.collections.HashMap
  */
 object Parser {
 
-
-
     private val sdfWithTime =
         SimpleDateFormat("yyyy-MM-dd HH:mm:SS").also { it.timeZone = TimeZone.getTimeZone("UTC") }
     private val sdfWithoutSeconds =

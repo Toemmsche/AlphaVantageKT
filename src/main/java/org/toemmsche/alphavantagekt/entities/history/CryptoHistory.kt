@@ -15,7 +15,8 @@ class CryptoHistory(
 ) : History(scope) {
 
     override fun update(): CryptoHistory {
-        data = Requester.getCryptoData(underlyingAsset.symbol, underlyingAsset.market, scope)
+        data.clear()
+        data.addAll(Requester.getCryptoData(underlyingAsset.symbol, underlyingAsset.market, scope))
         return this
     }
 

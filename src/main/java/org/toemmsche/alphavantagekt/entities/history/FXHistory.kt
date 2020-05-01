@@ -16,13 +16,15 @@ class FXHistory(
 ) : History(scope) {
 
     override fun update(): FXHistory {
-        data = Requester.getFXData(underlyingAsset.fromSymbol, underlyingAsset.toSymbol, scope, null)
+        data.clear()
+        data.addAll(Requester.getFXData(underlyingAsset.fromSymbol, underlyingAsset.toSymbol, scope, null))
         return this
     }
 
     override fun update(interval: Interval): FXHistory {
+        data.clear()
         if (scope != Scope.INTRADAY) throw UnsupportedOperationException("Parameter 'interval' can only be used with intraday scope")
-        data = Requester.getFXData(underlyingAsset.fromSymbol, underlyingAsset.toSymbol, scope, interval)
+        data.addAll(Requester.getFXData(underlyingAsset.fromSymbol, underlyingAsset.toSymbol, scope, interval))
         return this
     }
 

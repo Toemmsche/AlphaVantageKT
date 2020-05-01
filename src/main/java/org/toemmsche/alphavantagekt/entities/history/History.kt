@@ -17,7 +17,7 @@ import org.toemmsche.alphavantagekt.enums.Scope
  */
 abstract class History(
     val scope: Scope,
-    var data: MutableList<HistoricalQuote> = ArrayList<HistoricalQuote>()
+    val data: MutableList<HistoricalQuote> = ArrayList<HistoricalQuote>()
 ) : MutableList<HistoricalQuote> by data {
 
     abstract val underlyingAsset: Asset

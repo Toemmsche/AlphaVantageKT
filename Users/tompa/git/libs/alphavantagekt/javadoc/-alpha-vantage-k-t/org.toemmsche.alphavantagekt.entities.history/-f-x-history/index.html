@@ -1,0 +1,62 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>FXHistory - AlphaVantageKT</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">AlphaVantageKT</a>&nbsp;/&nbsp;<a href="../index.html">org.toemmsche.alphavantagekt.entities.history</a>&nbsp;/&nbsp;<a href="./index.html">FXHistory</a><br/>
+<br/>
+<h1>FXHistory</h1>
+<code><span class="keyword">class </span><span class="identifier">FXHistory</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-history/index.html"><span class="identifier">History</span></a></code>
+<p>The history subclass for a Foreign Exchange Pair (FX).</p>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="-init-.html">&lt;init&gt;</a></h4>
+</td>
+<td>
+<p>The history subclass for a Foreign Exchange Pair (FX).</p>
+<code><span class="identifier">FXHistory</span><span class="symbol">(</span><span class="identifier" id="org.toemmsche.alphavantagekt.entities.history.FXHistory$<init>(org.toemmsche.alphavantagekt.entities.FX, org.toemmsche.alphavantagekt.enums.Scope)/underlyingAsset">underlyingAsset</span><span class="symbol">:</span>&nbsp;<a href="../../org.toemmsche.alphavantagekt.entities/-f-x/index.html"><span class="identifier">FX</span></a><span class="symbol">, </span><span class="identifier" id="org.toemmsche.alphavantagekt.entities.history.FXHistory$<init>(org.toemmsche.alphavantagekt.entities.FX, org.toemmsche.alphavantagekt.enums.Scope)/scope">scope</span><span class="symbol">:</span>&nbsp;<a href="../../org.toemmsche.alphavantagekt.enums/-scope/index.html"><span class="identifier">Scope</span></a><span class="symbol">)</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="underlying-asset.html">underlyingAsset</a></h4>
+</td>
+<td>
+<p>The asset associated with this history. Can be a stock, FX pair or cryptocurrency.</p>
+<code><span class="keyword">val </span><span class="identifier">underlyingAsset</span><span class="symbol">: </span><a href="../../org.toemmsche.alphavantagekt.entities/-f-x/index.html"><span class="identifier">FX</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="to-string.html">toString</a></h4>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toString</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="update.html">update</a></h4>
+</td>
+<td>
+<p>Updates the historical data specified by the scope and the underlying asset with an API call.</p>
+<code><span class="keyword">fun </span><span class="identifier">update</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">FXHistory</span></a></code>
+<p>Updates the historical data with a given interval if the scope is intraday, otherwise throws an Exception.</p>
+<code><span class="keyword">fun </span><span class="identifier">update</span><span class="symbol">(</span><span class="identifier" id="org.toemmsche.alphavantagekt.entities.history.FXHistory$update(org.toemmsche.alphavantagekt.enums.Interval)/interval">interval</span><span class="symbol">:</span>&nbsp;<a href="../../org.toemmsche.alphavantagekt.enums/-interval/index.html"><span class="identifier">Interval</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">FXHistory</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

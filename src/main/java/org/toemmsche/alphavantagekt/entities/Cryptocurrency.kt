@@ -19,7 +19,7 @@ class Cryptocurrency(symbol : String,
 
     //Current data
     var latestRate : ExchangeQuote
-        get() = Currency(market).getExchangeRateTo(market)
+        get() = Currency(symbol).getExchangeRateTo(market)
         private set(value) = Unit
 
     //Historical data
