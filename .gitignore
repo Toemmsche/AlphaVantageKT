@@ -1,7 +1,16 @@
-# Project exclude paths
-/out/
-/.gradle/
-/build/
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# Gradle
+out/
+.gradle/
+gradle/
+build/
+gradlew.bat
+gradlew
+
 
 # Private files
 APIKey
