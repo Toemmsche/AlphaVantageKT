@@ -1,60 +1,61 @@
 package query
 
+import blocks.*
 import blocks.Function
-import blocks.Interval
-import blocks.OutputSize
-import blocks.Slice
 
 /**
  * Implements the builder pattern for queries to the Alpha Vantage API.
  */
 class QueryBuilder {
 
-    private val params = emptyMap<String, String>().toMutableMap()
-
-
-    // TODO Encapsulate params
+    protected lateinit var type: QueryType
+    protected val params = emptyMap<Parameter, Any>().toMutableMap()
 
     // Always required
+    fun type(type: QueryType): QueryBuilder {
+        this.type = type
+        return this
+    }
+
     fun function(function: Function): QueryBuilder {
-        params["function"] = function.strVal
+        params[Parameter.FUNCTION] = function
         return this
     }
 
     fun symbol(symbol: String): QueryBuilder {
-        params["symbol"] = symbol
+        params[Parameter.SYMBOL] = symbol
         return this
     }
 
     fun apiKey(apiKey: String): QueryBuilder {
-        params["apiKey"] = apiKey
+        params[Parameter.APIKEY] = apiKey
         return this
     }
 
     // Sometimes required
     fun interval(interval: Interval): QueryBuilder {
-        params["interval"] = interval.strVal
+        params[Parameter.INTERVAL] = interval.strVal
         return this
     }
 
     fun slice(slice: Slice): QueryBuilder {
-        params["slice"] = slice.toString()
+        params[Parameter.SLICE] = slice
         return this
     }
 
-    fun adjusted(adjusted: Boolean) : QueryBuilder {
-        params["adjusted"] = adjusted.toString()
+    fun adjusted(adjusted: Boolean): QueryBuilder {
+        params[Parameter.ADJUSTED] = adjusted
         return this
     }
 
     // Always optional
-    fun outputSize(outputSize: OutputSize) : QueryBuilder {
-        params["outputsize"] = outputSize.strVal
+    fun outputSize(outputSize: OutputSize): QueryBuilder {
+        params[Parameter.OUTPUT_SIZE] = outputSize
         return this
     }
 
 
-    fun build() : Query {
-        return Query(params)
+    fun build(): Query {
+        return Query(type, params)
     }
 }

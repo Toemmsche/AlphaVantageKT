@@ -1,12 +1,15 @@
 package query
 
+import blocks.Parameter
+import blocks.QueryType
 import exceptions.AlphaVantageException
 import java.net.URL
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-class Query(private val params: Map<String, String>) {
+class Query(val type : QueryType, val params: Map<Parameter, Any>) {
+
 
     private val ALPHA_VANTAGE_URL = "https://www.alphavantage.co/query"
 
@@ -14,9 +17,10 @@ class Query(private val params: Map<String, String>) {
      * Send out the query to the Alpha Vantage backend and wait for the response.
      * @return The response body.
      */
-    fun send(): String {
+    fun send(): Response {
+
         val queryUrl = URL(ALPHA_VANTAGE_URL + "?" + params
-                .map { it.key + "=" + it.value }
+                .map { it.key.toString() + "=" + it.value.toString() }
                 .joinToString("&"))
         val httpClient = HttpClient.newHttpClient()
         val httpRequest = HttpRequest
@@ -29,9 +33,9 @@ class Query(private val params: Map<String, String>) {
                         HttpResponse.BodyHandlers.ofString(),
                 )
         return when (httpResponse.statusCode()) {
-            in 200 until 300 -> httpResponse.body()
+            in 200 until 300 -> Response(this, httpResponse.body())
             in 400 until 500 -> throw AlphaVantageException(httpResponse.body())
-            else -> httpResponse.body()
+            else -> Response(this, httpResponse.body())
         }
     }
 

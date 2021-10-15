@@ -8,7 +8,7 @@ import kotlin.ParameterName
  * @property strVal The output size value formatted as a String for the API
  *                  query.
  */
-enum class OutputSize(val strVal: String){
+enum class OutputSize(val strVal: String) {
     COMPACT("compact"),
     FULL("full");
 }
