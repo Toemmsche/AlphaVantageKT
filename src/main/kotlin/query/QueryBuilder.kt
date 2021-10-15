@@ -8,7 +8,7 @@ import blocks.Function
  */
 class QueryBuilder {
 
-    protected lateinit var type: QueryType
+    protected var type: QueryType = QueryType.STOCK
     protected val params = emptyMap<Parameter, Any>().toMutableMap()
 
     // Always required
