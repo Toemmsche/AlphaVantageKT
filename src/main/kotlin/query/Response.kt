@@ -3,6 +3,8 @@ package query
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import model.Historical
+import java.lang.UnsupportedOperationException
 
 /**
  * Encapsulates a successful response from the Alpha Vantage backend.
@@ -18,5 +20,12 @@ class Response(val query: Query, val body: String) {
      */
     fun json() : JsonElement {
         return Json.parseToJsonElement(body)
+    }
+
+    /**
+     * @return The response as a parsed CSV document
+     */
+    fun csv() : List<List<String>> {
+        throw UnsupportedOperationException()
     }
 }
