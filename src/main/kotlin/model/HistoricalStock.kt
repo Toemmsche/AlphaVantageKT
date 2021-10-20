@@ -1,8 +1,9 @@
 package model
 
+import java.time.ZonedDateTime
 import java.util.*
 
-data class HistoricalStock(val date: Date, val open: Double, val high: Double,
-                      val low: Double, val volume: Int) : Historical(date) {
+class HistoricalStock(date: ZonedDateTime, val open: Double, val high: Double,
+                      val low: Double, val close: Double, val volume: Int) : Historical(date) {
 
 }

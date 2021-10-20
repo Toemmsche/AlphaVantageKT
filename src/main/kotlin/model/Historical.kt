@@ -1,8 +1,7 @@
 package model
 
-import kotlinx.serialization.json.JsonElement
-import java.util.*
+import java.time.ZonedDateTime
 
-open class Historical(val Date) {
+open class Historical(val date: ZonedDateTime) {
 
 }
