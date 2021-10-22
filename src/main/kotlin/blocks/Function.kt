@@ -16,5 +16,7 @@ enum class Function(val strVal: String) {
     GLOBAL_QUOTE("GLOBAL_QUOTE"),
     SYMBOL_SEARCH("SYMBOL_SEARCH"),
     OVERVIEW("OVERVIEW");
+
+    override fun toString() = strVal
 }
 

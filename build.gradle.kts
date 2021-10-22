@@ -17,6 +17,8 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
+    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.1.0")
+
 }
 
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks

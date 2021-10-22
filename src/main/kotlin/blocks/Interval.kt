@@ -11,4 +11,6 @@ enum class Interval(val strVal: String)  {
     FIFTEEN_MINUTES("15min"),
     THIRTY_MINUTES("30min"),
     SIXTY_MINUTES("60min");
+
+    override fun toString() = strVal
 }

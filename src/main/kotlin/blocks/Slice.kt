@@ -9,9 +9,5 @@ class Slice(val year: Int, val month: Int) {
         assert(month in 1..12)
     }
 
-    override fun toString(): String {
-        return "year${year}month${month}"
-    }
-
-
+    override fun toString()= "year${year}month${month}"
 }

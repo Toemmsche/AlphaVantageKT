@@ -1,6 +1,6 @@
 package query
 
-import blocks.Parameter
+import blocks.ParameterName
 import blocks.QueryType
 import exceptions.AlphaVantageException
 import java.net.URL
@@ -8,7 +8,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-class Query(val type : QueryType, val params: Map<Parameter, Any>) {
+class Query(val type: QueryType, val params: Map<ParameterName, Any>) {
 
 
     private val ALPHA_VANTAGE_URL = "https://www.alphavantage.co/query"
@@ -18,10 +18,7 @@ class Query(val type : QueryType, val params: Map<Parameter, Any>) {
      * @return The response body.
      */
     fun send(): Response {
-
-        val queryUrl = URL(ALPHA_VANTAGE_URL + "?" + params
-                .map { it.key.toString() + "=" + it.value.toString() }
-                .joinToString("&"))
+        val queryUrl = toUrl()
         val httpClient = HttpClient.newHttpClient()
         val httpRequest = HttpRequest
                 .newBuilder(queryUrl.toURI())
@@ -38,6 +35,13 @@ class Query(val type : QueryType, val params: Map<Parameter, Any>) {
             else -> Response(this, httpResponse.body())
         }
     }
+
+    fun toUrl() = URL("$ALPHA_VANTAGE_URL?${
+        params
+                .map { it.key.toString() + "=" + it.value.toString() }
+                .joinToString("&")
+    }")
+
 
     // TODO toStockQuote(), toFXQuote(), ... functions, maybe in constructor with serializable objects
 }

@@ -10,4 +10,6 @@ import kotlin.ParameterName
 enum class DataType(val strVal: String)  {
     CSV("csv"),
     JSON("json");
+
+    override fun toString() = strVal
 }

@@ -2,6 +2,8 @@ package query
 
 import blocks.*
 import blocks.Function
+import javax.xml.crypto.Data
+import blocks.ParameterName as PM
 
 /**
  * Implements the builder pattern for queries to the Alpha Vantage API.
@@ -9,7 +11,7 @@ import blocks.Function
 class QueryBuilder {
 
     protected var type: QueryType = QueryType.STOCK
-    protected val params = emptyMap<Parameter, Any>().toMutableMap()
+    protected val params = emptyMap<PM, Any>().toMutableMap()
 
     // Always required
     fun type(type: QueryType): QueryBuilder {
@@ -17,40 +19,45 @@ class QueryBuilder {
         return this
     }
 
+    fun dataType(type: DataType) : QueryBuilder {
+        params[PM.DATATYPE] = type
+        return this
+    }
+
     fun function(function: Function): QueryBuilder {
-        params[Parameter.FUNCTION] = function
+        params[PM.FUNCTION] = function
         return this
     }
 
     fun symbol(symbol: String): QueryBuilder {
-        params[Parameter.SYMBOL] = symbol
+        params[PM.SYMBOL] = symbol
         return this
     }
 
     fun apiKey(apiKey: String): QueryBuilder {
-        params[Parameter.APIKEY] = apiKey
+        params[PM.APIKEY] = apiKey
         return this
     }
 
     // Sometimes required
     fun interval(interval: Interval): QueryBuilder {
-        params[Parameter.INTERVAL] = interval.strVal
+        params[PM.INTERVAL] = interval
         return this
     }
 
     fun slice(slice: Slice): QueryBuilder {
-        params[Parameter.SLICE] = slice
+        params[PM.SLICE] = slice
         return this
     }
 
     fun adjusted(adjusted: Boolean): QueryBuilder {
-        params[Parameter.ADJUSTED] = adjusted
+        params[PM.ADJUSTED] = adjusted
         return this
     }
 
     // Always optional
     fun outputSize(outputSize: OutputSize): QueryBuilder {
-        params[Parameter.OUTPUT_SIZE] = outputSize
+        params[PM.OUTPUT_SIZE] = outputSize
         return this
     }
 

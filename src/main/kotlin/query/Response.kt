@@ -1,10 +1,12 @@
 package query
 
+import com.github.doyaaaaaken.kotlincsv.client.CsvReader
+import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import exceptions.AlphaVantageException
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import model.Historical
-import java.lang.UnsupportedOperationException
+import kotlinx.serialization.json.jsonObject
 
 /**
  * Encapsulates a successful response from the Alpha Vantage backend.
@@ -16,16 +18,22 @@ class Response(val query: Query, val body: String) {
     /**
      * @return The response body as a built-in JSON element.
      * @throws SerializationException If the body is not a valid JSON string.
+     * @throws AlphaVantageException If this response indicates an Error.
      *
      */
-    fun json() : JsonElement {
-        return Json.parseToJsonElement(body)
+    fun json(): JsonElement {
+        val jsonElement = Json.parseToJsonElement(body)
+        val errorMsgKey = "Error Message"
+        if (jsonElement.jsonObject.containsKey(errorMsgKey)) {
+            throw AlphaVantageException(
+                    jsonElement.jsonObject[errorMsgKey].toString())
+        }
+        return jsonElement
     }
 
     /**
      * @return The response as a parsed CSV document
      */
-    fun csv() : List<List<String>> {
-        throw UnsupportedOperationException()
-    }
+    fun csv() = csvReader().readAllWithHeader(body)
 }
+

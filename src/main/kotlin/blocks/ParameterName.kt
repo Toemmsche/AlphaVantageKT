@@ -5,7 +5,7 @@ package blocks
  *
  * @property strVal The name of the parameter inside the query URL as a string.
  */
-enum class Parameter(val strVal: String) {
+enum class ParameterName(val strVal: String) {
     FUNCTION("function"),
     INTERVAL("interval"),
     OUTPUT_SIZE("outputsize"),

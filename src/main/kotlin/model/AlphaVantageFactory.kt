@@ -1,14 +1,20 @@
 package model
 
-import blocks.Interval
-import blocks.JsonProperties
-import blocks.OutputSize
-import blocks.QueryType
+import blocks.*
+import component6
+import component7
+import component8
+import firstWithSuffix
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import parseZonedAvDate
 import query.Response
+import java.time.ZonedDateTime
 import java.util.*
+import blocks.Function
+import blocks.CsvProperties as CP
+import blocks.JsonProperties as JP
+import blocks.ParameterName as PM
 
 class AlphaVantageFactory {
 
@@ -17,50 +23,73 @@ class AlphaVantageFactory {
             throw IllegalArgumentException(
                     "Alpha Vantage Query type does not match")
         }
-        val metadata = response
-                .json()
-                .jsonObject[JsonProperties.METADATA.toString()]!!
-                .jsonObject
+        val queryParams = response.query.params
+        // Every query needs a function
+        val function: Function = queryParams[PM.FUNCTION] as Function
+        if (queryParams[PM.DATATYPE] == DataType.CSV) {
+            val interval = if (queryParams.containsKey(PM.INTERVAL))
+                queryParams[PM.INTERVAL] as Interval else null
+            val outputSize =
+                    if (queryParams.containsKey(PM.OUTPUT_SIZE))
+                        queryParams[PM.OUTPUT_SIZE] as OutputSize else null
+            val timeZone = TimeZone.getTimeZone("US/Eastern")
+            val symbol = queryParams[PM.SYMBOL] as String
+            val csv = response.csv().toMutableList()
+            val history = csv.map { createHistoricalStock(it, timeZone) }
+            return Stock(function, null, symbol, ZonedDateTime.now(), interval,
+                         outputSize, timeZone,
+                         history)
+        } else {
+            val metadata = response
+                    .json()
+                    .jsonObject[JP.METADATA.toString()]!!
+                    .jsonObject
 
-        // map to internal object according to response pattern of Alpha Vantage
-        // see https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo
-        val information =
-                metadata[JsonProperties.INFORMATION.toString()].toString()
-        val symbol =
-                metadata[JsonProperties.SYMBOL.toString()].toString()
-        // We need the time zone for "last refreshed"
-        val timeZone =
-                TimeZone.getTimeZone(
-                        metadata[JsonProperties.TIME_ZONE.toString()]
-                                ?.toString())
-        val lastRefreshed =
-                parseZonedAvDate(
-                        metadata[JsonProperties.LAST_REFRESHED.toString()].toString(),
-                        timeZone)
-        val interval =
+            // map to internal object according to response pattern of Alpha Vantage
+            // see https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=4min&apikey=demo
+            val information =
+                    metadata.firstWithSuffix(JP.INFORMATION.toString())
+            val symbol =
+                    metadata.firstWithSuffix(JP.SYMBOL.toString())
+            // We need the time zone for "last refreshed"
+            val timeZone =
+                    TimeZone.getTimeZone(
+                            metadata.firstWithSuffix(JP.TIME_ZONE.toString()))
+            val lastRefreshed =
+                    parseZonedAvDate(
+                            metadata.firstWithSuffix(
+                                    JP.LAST_REFRESHED.toString()),
+                            timeZone,
+                    )
+            val interval = if (queryParams.containsKey(PM.INTERVAL))
+                queryParams[PM.INTERVAL] as Interval else
                 Interval.valueOf(
-                        metadata[JsonProperties.INTERVAL.toString()].toString())
-        val outputSize = OutputSize.valueOf(
-                metadata[JsonProperties.OUTPUT_SIZE.toString()].toString())
+                        metadata.firstWithSuffix(JP.INTERVAL.toString()))
+            val outputSize =
+                    if (queryParams.containsKey(PM.OUTPUT_SIZE))
+                        queryParams[PM.OUTPUT_SIZE] as OutputSize else
+                        OutputSize.fromAlias(
+                                metadata.firstWithSuffix(
+                                        JP.OUTPUT_SIZE.toString()))
+
+            val history = response
+                    .json()
+                    .jsonObject
+                    .entries.elementAt(1)
+                    .value
+                    .jsonObject
+                    .entries
+                    .map { createHistoricalStock(it.toPair(), timeZone) }
 
 
-        val history = response
-                .json()
-                .jsonObject
-                .entries
-                .first { // find history attribute
-                    it.key.startsWith(JsonProperties.TIME_SERIES.toString())
-                }
-                .value
-                .jsonObject
-                .entries
-                .map { createHistoricalStock(it.toPair(), timeZone) }
-        return Stock(information, symbol, lastRefreshed, interval, outputSize,
-                     timeZone, history)
+            return Stock(function, information, symbol, lastRefreshed, interval,
+                         outputSize,
+                         timeZone, history)
+        }
     }
 
-    private fun createHistoricalStock(structure: Pair<String, JsonElement>,
-                                      timeZone: TimeZone): HistoricalStock {
+    fun createHistoricalStock(structure: Pair<String, JsonElement>,
+                              timeZone: TimeZone): HistoricalStock {
         val identifier = structure.first
         val jsonObject = structure.second.jsonObject
 
@@ -68,18 +97,75 @@ class AlphaVantageFactory {
         val date = parseZonedAvDate(identifier, timeZone)
 
         // Parse data
-        val open =
-                jsonObject[JsonProperties.OPEN.toString()].toString().toDouble()
-        val high =
-                jsonObject[JsonProperties.HIGH.toString()].toString().toDouble()
-        val low =
-                jsonObject[JsonProperties.LOW.toString()].toString().toDouble()
-        val close = jsonObject[JsonProperties.CLOSE.toString()].toString()
-                .toDouble()
+        val (
+                open,
+                high,
+                low,
+                close,
+                adjustedClose,
+                volume,
+                dividendAmount,
+                splitCoefficient,
+        ) = listOf(
+                JP.OPEN,
+                JP.HIGH,
+                JP.LOW,
+                JP.CLOSE,
+                JP.ADJUSTED_CLOSE,
+                JP.VOLUME,
+                JP.DIVIDEND_AMOUNT,
+                JP.SPLIT_COEFFICIENT,
+        ).map mapper@{
+            try {
+                return@mapper jsonObject.firstWithSuffix(it.toString())
+                        .toDouble()
+            } catch (e: NoSuchElementException) {
+                return@mapper null
+            }
+        }
 
-        val volume = jsonObject[JsonProperties.VOLUME.toString()].toString()
-                .toInt()
-
-        return HistoricalStock(date, open, high, low, close, volume)
+        return HistoricalStock(
+                date,
+                open!!,
+                high!!,
+                low!!,
+                close!!,
+                volume!!.toInt(),
+        )
     }
+
+    fun createHistoricalStock(fields: Map<String, String>,
+                              timeZone: TimeZone): HistoricalStock {
+        // Parse date
+        val date = parseZonedAvDate(fields[CP.DATE.toString()]!!, timeZone)
+        val (
+                open,
+                high,
+                low,
+                close,
+                adjustedClose,
+                volume,
+                dividendAmount,
+                splitCoefficient,
+        ) = listOf(
+                CP.OPEN,
+                CP.HIGH,
+                CP.LOW,
+                CP.CLOSE,
+                CP.ADJUSTED_CLOSE,
+                CP.VOLUME,
+                CP.DIVIDEND_AMOUNT,
+                CP.SPLIT_COEFFICIENT,
+        ).map { fields[it.toString()]?.toDouble() }
+        return HistoricalStock(
+                date,
+                open!!,
+                high!!,
+                low!!,
+                close!!,
+                volume!!.toInt(),
+        )
+    }
+
+
 }
