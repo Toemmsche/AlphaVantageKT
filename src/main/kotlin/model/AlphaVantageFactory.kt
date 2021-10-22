@@ -1,20 +1,21 @@
 package model
-
-import blocks.*
 import component6
 import component7
 import component8
 import firstWithSuffix
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
+import model.stock.HistoricalStock
+import model.stock.Stock
 import parseZonedAvDate
-import query.Response
+import query.*
 import java.time.ZonedDateTime
 import java.util.*
-import blocks.Function
-import blocks.CsvProperties as CP
-import blocks.JsonProperties as JP
-import blocks.ParameterName as PM
+import query.Function
+import response.Response
+import response.CsvProperties as CP
+import response.JsonProperties as JP
+import query.ParameterName as PM
 
 class AlphaVantageFactory {
 

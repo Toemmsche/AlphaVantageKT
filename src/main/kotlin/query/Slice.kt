@@ -1,4 +1,4 @@
-package blocks
+package query
 
 class Slice(val year: Int, val month: Int) {
 

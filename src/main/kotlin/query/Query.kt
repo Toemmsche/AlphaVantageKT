@@ -1,8 +1,7 @@
 package query
 
-import blocks.ParameterName
-import blocks.QueryType
 import exceptions.AlphaVantageException
+import response.Response
 import java.net.URL
 import java.net.http.HttpClient
 import java.net.http.HttpRequest

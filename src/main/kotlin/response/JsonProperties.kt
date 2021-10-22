@@ -1,4 +1,4 @@
-package blocks
+package response
 
 enum class JsonProperties(val strVal: String) {
     METADATA("Meta Data"),

@@ -1,5 +1,6 @@
-package model
+package model.stock
 
+import model.Historical
 import java.time.ZonedDateTime
 
 class HistoricalStock(

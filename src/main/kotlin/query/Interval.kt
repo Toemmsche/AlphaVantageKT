@@ -1,4 +1,4 @@
-package blocks
+package query
 
 /**
  * An enum for all intervals accepted by the API for retrieval of data.

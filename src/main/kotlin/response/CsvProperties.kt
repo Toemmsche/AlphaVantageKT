@@ -1,4 +1,4 @@
-package blocks
+package response
 
 enum class CsvProperties(val strVal: String) {
     DATE("time"),

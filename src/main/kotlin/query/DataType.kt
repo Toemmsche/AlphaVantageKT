@@ -1,6 +1,4 @@
-package blocks
-
-import kotlin.ParameterName
+package query
 
 /**
  * An enum for all options for the data type of an API response

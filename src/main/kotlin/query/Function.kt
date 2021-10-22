@@ -1,4 +1,4 @@
-package blocks
+package query
 
 /**
  * An enum for the functions accepted by the AlphaVantage API for the retrieval of data.

@@ -1,4 +1,4 @@
-package blocks
+package query
 
 /**
  * An enum for all options for the output size of an API response.

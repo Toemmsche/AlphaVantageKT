@@ -1,12 +1,10 @@
-import blocks.DataType
-import blocks.Function
-import blocks.Interval
-import blocks.OutputSize
+import query.DataType
+import query.Function
+import query.Interval
+import query.OutputSize
 import model.AlphaVantageFactory
 import query.QueryBuilder
-import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 fun main() {
@@ -23,7 +21,6 @@ fun main() {
                     .build()
                     .also { println(it.toUrl()) }
                     .send()
-
                     .also { println(it.body); AlphaVantageFactory().createStock(it)})
 
 

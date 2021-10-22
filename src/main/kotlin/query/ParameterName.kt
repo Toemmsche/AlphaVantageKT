@@ -1,4 +1,4 @@
-package blocks
+package query
 
 /**
  * Parameter names for the Alpha Vantage API.

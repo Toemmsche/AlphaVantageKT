@@ -1,4 +1,4 @@
-package blocks
+package query
 
 enum class QueryType {
     STOCK,

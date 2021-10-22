@@ -1,12 +1,12 @@
-package query
+package response
 
-import com.github.doyaaaaaken.kotlincsv.client.CsvReader
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import exceptions.AlphaVantageException
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
+import query.Query
 
 /**
  * Encapsulates a successful response from the Alpha Vantage backend.

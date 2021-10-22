@@ -1,8 +1,9 @@
-package model
+package model.stock
 
-import blocks.Function
-import blocks.Interval
-import blocks.OutputSize
+import model.AlphaVantageData
+import query.Function
+import query.Interval
+import query.OutputSize
 import java.time.ZonedDateTime
 import java.util.*
 

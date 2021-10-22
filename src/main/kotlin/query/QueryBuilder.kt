@@ -1,9 +1,6 @@
 package query
 
-import blocks.*
-import blocks.Function
-import javax.xml.crypto.Data
-import blocks.ParameterName as PM
+import query.ParameterName as PM
 
 /**
  * Implements the builder pattern for queries to the Alpha Vantage API.
