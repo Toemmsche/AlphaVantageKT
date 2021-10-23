@@ -1,16 +1,17 @@
 package model.stock
 
-import model.Historical
 import java.time.ZonedDateTime
 
-class HistoricalStock(
-        date: ZonedDateTime,
+data class HistoricalStock(
+        val date: ZonedDateTime,
         val open: Double,
         val high: Double,
         val low: Double,
         val close: Double,
+        val adjustedClose: Double?,
         val volume: Int,
-        //TODO add attributes
-) : Historical(date) {
+        val dividendAmount: Double?,
+        val splitCoefficient: Double?
+){
 
 }

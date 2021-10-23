@@ -1,21 +1,24 @@
 package model
+
 import component6
 import component7
 import component8
 import firstWithSuffix
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
+import model.stock.GlobalQuote
 import model.stock.HistoricalStock
 import model.stock.Stock
+import parseAvDate
 import parseZonedAvDate
 import query.*
+import response.Response
 import java.time.ZonedDateTime
 import java.util.*
-import query.Function
-import response.Response
-import response.CsvProperties as CP
-import response.JsonProperties as JP
 import query.ParameterName as PM
+import response.CsvProperties as CP
+import response.GlobalQuoteJsonProperties as GJP
+import response.StockJsonProperties as SJP
 
 class AlphaVantageFactory {
 
@@ -26,7 +29,7 @@ class AlphaVantageFactory {
         }
         val queryParams = response.query.params
         // Every query needs a function
-        val function: Function = queryParams[PM.FUNCTION] as Function
+        val function = queryParams[PM.FUNCTION] as query.Function
         if (queryParams[PM.DATATYPE] == DataType.CSV) {
             val interval = if (queryParams.containsKey(PM.INTERVAL))
                 queryParams[PM.INTERVAL] as Interval else null
@@ -43,35 +46,35 @@ class AlphaVantageFactory {
         } else {
             val metadata = response
                     .json()
-                    .jsonObject[JP.METADATA.toString()]!!
+                    .jsonObject[SJP.METADATA.toString()]!!
                     .jsonObject
 
             // map to internal object according to response pattern of Alpha Vantage
             // see https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=4min&apikey=demo
             val information =
-                    metadata.firstWithSuffix(JP.INFORMATION.toString())
+                    metadata.firstWithSuffix(SJP.INFORMATION.toString())
             val symbol =
-                    metadata.firstWithSuffix(JP.SYMBOL.toString())
+                    metadata.firstWithSuffix(SJP.SYMBOL.toString())
             // We need the time zone for "last refreshed"
             val timeZone =
                     TimeZone.getTimeZone(
-                            metadata.firstWithSuffix(JP.TIME_ZONE.toString()))
+                            metadata.firstWithSuffix(SJP.TIME_ZONE.toString()))
             val lastRefreshed =
                     parseZonedAvDate(
                             metadata.firstWithSuffix(
-                                    JP.LAST_REFRESHED.toString()),
+                                    SJP.LAST_REFRESHED.toString()),
                             timeZone,
                     )
             val interval = if (queryParams.containsKey(PM.INTERVAL))
                 queryParams[PM.INTERVAL] as Interval else
                 Interval.valueOf(
-                        metadata.firstWithSuffix(JP.INTERVAL.toString()))
+                        metadata.firstWithSuffix(SJP.INTERVAL.toString()))
             val outputSize =
                     if (queryParams.containsKey(PM.OUTPUT_SIZE))
                         queryParams[PM.OUTPUT_SIZE] as OutputSize else
                         OutputSize.fromAlias(
                                 metadata.firstWithSuffix(
-                                        JP.OUTPUT_SIZE.toString()))
+                                        SJP.OUTPUT_SIZE.toString()))
 
             val history = response
                     .json()
@@ -108,14 +111,14 @@ class AlphaVantageFactory {
                 dividendAmount,
                 splitCoefficient,
         ) = listOf(
-                JP.OPEN,
-                JP.HIGH,
-                JP.LOW,
-                JP.CLOSE,
-                JP.ADJUSTED_CLOSE,
-                JP.VOLUME,
-                JP.DIVIDEND_AMOUNT,
-                JP.SPLIT_COEFFICIENT,
+                SJP.OPEN,
+                SJP.HIGH,
+                SJP.LOW,
+                SJP.CLOSE,
+                SJP.ADJUSTED_CLOSE,
+                SJP.VOLUME,
+                SJP.DIVIDEND_AMOUNT,
+                SJP.SPLIT_COEFFICIENT,
         ).map mapper@{
             try {
                 return@mapper jsonObject.firstWithSuffix(it.toString())
@@ -131,7 +134,10 @@ class AlphaVantageFactory {
                 high!!,
                 low!!,
                 close!!,
+                adjustedClose,
                 volume!!.toInt(),
+                dividendAmount,
+                splitCoefficient,
         )
     }
 
@@ -164,7 +170,54 @@ class AlphaVantageFactory {
                 high!!,
                 low!!,
                 close!!,
+                adjustedClose,
                 volume!!.toInt(),
+                dividendAmount,
+                splitCoefficient,
+        )
+    }
+
+    fun createGlobalQuote(response: Response): GlobalQuote {
+        val jsonObject = response
+                .json()
+                .jsonObject[GJP.GLOBAL_QUOTE.toString()]!!
+                .jsonObject
+        val latestTradingDay = parseAvDate(jsonObject.firstWithSuffix(
+                GJP.LATEST_TRADING_DAY.toString())).toLocalDate()
+
+        val symbol = jsonObject.firstWithSuffix(GJP.SYMBOL.toString())
+        val changePercent = jsonObject
+                .firstWithSuffix(GJP.CHANGE_PERCENT.toString())
+                .dropLast(1)
+                .toDouble()
+        val (
+                open,
+                high,
+                low,
+                price,
+                volume,
+                previousClose,
+                change,
+        ) = listOf(
+                GJP.OPEN,
+                GJP.HIGH,
+                GJP.LOW,
+                GJP.PRICE,
+                GJP.VOLUME,
+                GJP.PREVIOUS_CLOSE,
+                GJP.CHANGE
+        ).map { jsonObject.firstWithSuffix(it.toString()).toDouble() }
+        return GlobalQuote(
+                symbol,
+                open,
+                high,
+                low,
+                price,
+                volume.toInt(),
+                latestTradingDay,
+                previousClose,
+                change,
+                changePercent,
         )
     }
 

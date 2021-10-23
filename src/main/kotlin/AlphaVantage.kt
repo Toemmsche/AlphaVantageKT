@@ -11,17 +11,13 @@ fun main() {
     val date = LocalDate.parse("2021-10-12", DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay()
     println(QueryBuilder()
                     .apiKey("CSE3RJSJLAVEG0HL")
-                    .function(Function.TIME_SERIES_WEEKLY)
-                    .interval(Interval.ONE_MINUTE)
-                    .outputSize(OutputSize.FULL)
-                    .dataType(DataType.JSON)
-                    .adjusted(true)
+                    .function(Function.GLOBAL_QUOTE)
                     //.adjusted(true)
                     .symbol("TSLA")
                     .build()
                     .also { println(it.toUrl()) }
                     .send()
-                    .also { println(it.body); AlphaVantageFactory().createStock(it)})
+                    .also { println(it.body); AlphaVantageFactory().createGlobalQuote(it)})
 
 
     //TODO get AMD quotes
