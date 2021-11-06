@@ -18,6 +18,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.1.0")
+    implementation("org.junit.jupiter:junit-jupiter:5.4.2")
+    testImplementation(kotlin("test"))
 
 }
 
@@ -27,6 +29,11 @@ val compileTestKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     jvmTarget = "15"
 }
+
 compileTestKotlin.kotlinOptions {
     jvmTarget = "15"
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

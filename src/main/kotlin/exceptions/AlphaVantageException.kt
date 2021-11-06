@@ -1,5 +1,4 @@
 package exceptions
 
-import java.lang.RuntimeException
-
-class AlphaVantageException(override val message : String) : RuntimeException()
+open class AlphaVantageException(message: String) :
+        RuntimeException(message)

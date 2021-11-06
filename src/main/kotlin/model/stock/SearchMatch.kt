@@ -13,6 +13,6 @@ data class SearchMatch(
         val marketClose: LocalTime,
         val timeZone: TimeZone,
         val currency: Currency,
-        val matchScore: Float,
+        val matchScore: Double,
         ) {
 }

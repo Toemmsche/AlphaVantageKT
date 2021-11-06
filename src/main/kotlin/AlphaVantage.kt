@@ -1,4 +1,5 @@
 import model.AlphaVantageFactory
+import query.DataType
 import query.Function
 import query.QueryBuilder
 import query.QueryType
@@ -11,14 +12,14 @@ fun main() {
                     .type(QueryType.STOCK)
                     .apiKey("CSE3RJSJLAVEG0HL")
                     .function(Function.SYMBOL_SEARCH)
-                    .keywords("Game")
+                    .symbol("GME")
+                    .keywords("GME")
+                    .dataType(DataType.CSV)
                     //.adjusted(true)
                     .build()
                     .also { println(it.toUrl()) }
                     .send()
-                    .also { println(it.body); println(
-                            AlphaVantageFactory().createSearchMatches(
-                                    it)[0].timeZone.toString())
+                    .also { println(it.body);
                     })
 
 

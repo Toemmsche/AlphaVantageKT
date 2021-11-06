@@ -2,18 +2,25 @@ package response
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import exceptions.AlphaVantageException
+import exceptions.ApiLimitExceedException
+
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import query.Query
+import java.net.http.HttpHeaders
+import java.net.http.HttpResponse
 
 /**
  * Encapsulates a successful response from the Alpha Vantage backend.
  * @property query The query that triggered the response.
- * @property body The body of the HTTP response.
+ * @property httpResponse The HTTP response.
  */
-class Response(val query: Query, val body: String) {
+class Response(val query: Query,
+               private val httpResponse: HttpResponse<String>) {
+    val body
+        get() = httpResponse.body()
 
     /**
      * @return The response body as a built-in JSON element.
@@ -21,14 +28,39 @@ class Response(val query: Query, val body: String) {
      * @throws AlphaVantageException If this response indicates an Error.
      *
      */
-    fun json(): JsonElement {
-        val jsonElement = Json.parseToJsonElement(body)
-        val errorMsgKey = "Error Message"
-        if (jsonElement.jsonObject.containsKey(errorMsgKey)) {
-            throw AlphaVantageException(
-                    jsonElement.jsonObject[errorMsgKey].toString())
+    fun json(): JsonElement = Json.parseToJsonElement(body)
+
+
+    /**
+     * @return If this response is a valid JSON response.
+     */
+    fun isJson() : Boolean {
+        var isJson = false
+        httpResponse.headers().firstValue("Content-Type").ifPresent {
+            isJson = it == "application/json"
         }
-        return jsonElement
+        return isJson
+    }
+
+    /**
+     * @throws AlphaVantageException If something went wrong.
+     * @throws ApiLimitExceedException If the (free) API call limit has been
+     *     exceeded.
+     */
+    fun checkValidity() {
+        if (isJson()) {
+            val jsonObject = Json.parseToJsonElement(
+                    httpResponse.body()).jsonObject
+            val errorMsgKey = "Error Message"
+            val limitExceededKey = "Note"
+            if (jsonObject.containsKey(errorMsgKey)) {
+                throw AlphaVantageException(
+                        jsonObject[errorMsgKey].toString())
+            } else if (jsonObject.containsKey(limitExceededKey)) {
+                throw ApiLimitExceedException(
+                        jsonObject[limitExceededKey].toString())
+            }
+        }
     }
 
     /**

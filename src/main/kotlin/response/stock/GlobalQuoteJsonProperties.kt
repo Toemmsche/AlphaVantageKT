@@ -1,11 +1,11 @@
 package response.stock
 
+// TODO add parse() function as parameter
 enum class GlobalQuoteJsonProperties(val strVal: String) {
     SYMBOL("symbol"),
     OPEN("open"),
     HIGH("high"),
     LOW("low"),
-    CLOSE("close"),
     VOLUME("volume"),
     LATEST_TRADING_DAY("latest trading day"),
     PREVIOUS_CLOSE("previous close"),

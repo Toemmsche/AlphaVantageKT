@@ -9,6 +9,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import model.stock.*
 import parseAvDate
+import parseAvPercentage
 import parseAvTime
 import parseAvTimeZone
 import parseZonedAvDate
@@ -21,7 +22,9 @@ import kotlin.IllegalArgumentException
 import kotlin.Pair
 import kotlin.String
 import query.ParameterName as PM
+import response.stock.GlobalQuoteCsvProperties as GCP
 import response.stock.GlobalQuoteJsonProperties as GJP
+import response.stock.SearchCsvProperties as SECP
 import response.stock.SearchJsonProperties as SEJP
 import response.stock.StockCsvProperties as SCP
 import response.stock.StockJsonProperties as SJP
@@ -36,7 +39,7 @@ class AlphaVantageFactory {
         val queryParams = response.query.params
         // Every query needs a function
         val function = queryParams[PM.FUNCTION] as query.Function
-        if (queryParams[PM.DATATYPE] == DataType.CSV) {
+        if (!response.isJson()) {
             val interval = if (queryParams.containsKey(PM.INTERVAL))
                 queryParams[PM.INTERVAL] as Interval else null
             val outputSize =
@@ -46,9 +49,16 @@ class AlphaVantageFactory {
             val symbol = queryParams[PM.SYMBOL] as String
             val csv = response.csv().toMutableList()
             val history = csv.map { createHistoricalStock(it, timeZone) }
-            return Stock(function, null, symbol, ZonedDateTime.now(), interval,
-                         outputSize, timeZone,
-                         history)
+            return Stock(
+                    function,
+                    null,
+                    symbol,
+                    ZonedDateTime.now(),
+                    interval,
+                    outputSize,
+                    timeZone,
+                    history,
+            )
         } else {
             val metadata = response
                     .json()
@@ -190,47 +200,85 @@ class AlphaVantageFactory {
             throw IllegalArgumentException(
                     "Alpha Vantage query type does not match")
         }
-        val jsonObject = response
-                .json()
-                .jsonObject[GJP.GLOBAL_QUOTE.toString()]!!
-                .jsonObject
-        val latestTradingDay = parseAvDate(jsonObject.firstWithSuffix(
-                GJP.LATEST_TRADING_DAY.toString())).toLocalDate()
+        if (response.isJson()) {
+            val jsonObject = response
+                    .json()
+                    .jsonObject[GJP.GLOBAL_QUOTE.toString()]!!
+                    .jsonObject
+            val latestTradingDay = parseAvDate(jsonObject.firstWithSuffix(
+                    GJP.LATEST_TRADING_DAY.toString())).toLocalDate()
 
-        val symbol = jsonObject.firstWithSuffix(GJP.SYMBOL.toString())
-        val changePercent = jsonObject
-                .firstWithSuffix(GJP.CHANGE_PERCENT.toString())
-                .dropLast(1)
-                .toDouble()
-        val (
-                open,
-                high,
-                low,
-                price,
-                volume,
-                previousClose,
-                change,
-        ) = listOf(
-                GJP.OPEN,
-                GJP.HIGH,
-                GJP.LOW,
-                GJP.PRICE,
-                GJP.VOLUME,
-                GJP.PREVIOUS_CLOSE,
-                GJP.CHANGE
-        ).map { jsonObject.firstWithSuffix(it.toString()).toDouble() }
-        return GlobalQuote(
-                symbol,
-                open,
-                high,
-                low,
-                price,
-                volume.toInt(),
-                latestTradingDay,
-                previousClose,
-                change,
-                changePercent,
-        )
+            val symbol = jsonObject.firstWithSuffix(GJP.SYMBOL.toString())
+            val changePercent = parseAvPercentage(
+                    jsonObject.firstWithSuffix(GJP.CHANGE_PERCENT.toString()))
+            val (
+                    open,
+                    high,
+                    low,
+                    price,
+                    volume,
+                    previousClose,
+                    change,
+            ) = listOf(
+                    GJP.OPEN,
+                    GJP.HIGH,
+                    GJP.LOW,
+                    GJP.PRICE,
+                    GJP.VOLUME,
+                    GJP.PREVIOUS_CLOSE,
+                    GJP.CHANGE
+            ).map { jsonObject.firstWithSuffix(it.toString()).toDouble() }
+            return GlobalQuote(
+                    symbol,
+                    open,
+                    high,
+                    low,
+                    price,
+                    volume.toInt(),
+                    latestTradingDay,
+                    previousClose,
+                    change,
+                    changePercent,
+            )
+        } else {
+            val csv = response.csv().first()
+            val latestTradingDay = parseAvDate(
+                    csv[GCP.LATEST_TRADING_DAY.toString()]!!).toLocalDate()
+
+            val symbol = csv[GCP.SYMBOL.toString()]!!
+            val changePercent =
+                    parseAvPercentage(csv[GCP.CHANGE_PERCENT.toString()]!!)
+            val (
+                    open,
+                    high,
+                    low,
+                    price,
+                    volume,
+                    previousClose,
+                    change,
+            ) = listOf(
+                    GCP.OPEN,
+                    GCP.HIGH,
+                    GCP.LOW,
+                    GCP.PRICE,
+                    GCP.VOLUME,
+                    GCP.PREVIOUS_CLOSE,
+                    GCP.CHANGE
+            ).map { csv[it.toString()]!!.toDouble() }
+            return GlobalQuote(
+                    symbol,
+                    open,
+                    high,
+                    low,
+                    price,
+                    volume.toInt(),
+                    latestTradingDay,
+                    previousClose,
+                    change,
+                    changePercent,
+            )
+        }
+
     }
 
     fun createSearchMatches(response: Response): BestSearchMatches {
@@ -239,48 +287,92 @@ class AlphaVantageFactory {
             throw IllegalArgumentException(
                     "Alpha Vantage query type does not match")
         }
-        return response
-                .json()
-                .jsonObject[SEJP.BEST_MATCHES.toString()]!!
-                .jsonArray
-                .map {
-                    val jsonObject = it.jsonObject
-                    val marketOpen = parseAvTime(
-                            jsonObject.firstWithSuffix(SEJP.MARKET_OPEN))
-                    val marketClose = parseAvTime(
-                            jsonObject.firstWithSuffix(SEJP.MARKET_CLOSE))
-                    val currency =
-                            Currency.getInstance(
-                                    jsonObject.firstWithSuffix(SEJP.CURRENCY))
-                    val matchScore =
-                            jsonObject.firstWithSuffix(SEJP.MATCH_SCORE)
-                                    .toFloat()
-                    val timeZone = parseAvTimeZone(
-                            jsonObject.firstWithSuffix(SEJP.TIMEZONE))
-                    val (
-                            symbol,
-                            name,
-                            type,
-                            region,
-                    ) = listOf(
-                            SEJP.SYMBOL,
-                            SEJP.NAME,
-                            SEJP.TYPE,
-                            SEJP.REGION,
-                    ).map { jsonObject.firstWithSuffix(it.toString()) }
-                    SearchMatch(
-                            symbol,
-                            name,
-                            type,
-                            region,
-                            marketOpen,
-                            marketClose,
-                            timeZone,
-                            currency,
-                            matchScore,
-                    )
-                }
-                .toCollection(BestSearchMatches())
+        if (response.isJson()) {
+            return response
+                    .json()
+                    .jsonObject[SEJP.BEST_MATCHES.toString()]!!
+                    .jsonArray
+                    .map {
+                        val jsonObject = it.jsonObject
+                        val marketOpen = parseAvTime(
+                                jsonObject.firstWithSuffix(SECP.MARKET_OPEN))
+                        val marketClose = parseAvTime(
+                                jsonObject.firstWithSuffix(SECP.MARKET_CLOSE))
+                        val currency =
+                                Currency.getInstance(
+                                        jsonObject.firstWithSuffix(
+                                                SECP.CURRENCY))
+                        val matchScore =
+                                jsonObject.firstWithSuffix(SEJP.MATCH_SCORE)
+                                        .toDouble()
+                        val timeZone = parseAvTimeZone(
+                                jsonObject.firstWithSuffix(SEJP.TIMEZONE))
+                        val (
+                                symbol,
+                                name,
+                                type,
+                                region,
+                        ) = listOf(
+                                SEJP.SYMBOL,
+                                SEJP.NAME,
+                                SEJP.TYPE,
+                                SEJP.REGION,
+                        ).map { jsonObject.firstWithSuffix(it.toString()) }
+                        SearchMatch(
+                                symbol,
+                                name,
+                                type,
+                                region,
+                                marketOpen,
+                                marketClose,
+                                timeZone,
+                                currency,
+                                matchScore,
+                        )
+                    }
+                    .toCollection(BestSearchMatches())
+        } else {
+            return response
+                    .csv()
+                    .map { row ->
+                        val marketOpen = parseAvTime(
+                                row[SECP.MARKET_OPEN.toString()]!!)
+                        val marketClose = parseAvTime(
+                                row[SECP.MARKET_CLOSE.toString()]!!)
+                        val currency =
+                                Currency.getInstance(
+                                        row[SECP.CURRENCY.toString()]!!)
+                        val matchScore =
+                                row[SECP.MATCH_SCORE.toString()]!!
+                                        .toDouble()
+                        val timeZone = parseAvTimeZone(
+                                row[SECP.TIMEZONE.toString()]!!)
+                        val (
+                                symbol,
+                                name,
+                                type,
+                                region,
+                        ) = listOf(
+                                SECP.SYMBOL,
+                                SECP.NAME,
+                                SECP.TYPE,
+                                SECP.REGION,
+                        ).map { row[it.toString()]!! }
+                        SearchMatch(
+                                symbol,
+                                name,
+                                type,
+                                region,
+                                marketOpen,
+                                marketClose,
+                                timeZone,
+                                currency,
+                                matchScore,
+                        )
+                    }
+                    .toCollection(BestSearchMatches())
+        }
+
     }
 
 
