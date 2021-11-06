@@ -1,5 +1,6 @@
 package query
 
+import exceptions.AlphaVantageException
 import query.ParameterName as PM
 
 /**
@@ -7,7 +8,7 @@ import query.ParameterName as PM
  */
 class QueryBuilder {
 
-    protected var type: QueryType = QueryType.STOCK
+    protected var type: QueryType? = null
     protected val params = emptyMap<PM, Any>().toMutableMap()
 
     // Always required
@@ -52,14 +53,21 @@ class QueryBuilder {
         return this
     }
 
+    fun keywords(keywords: String) : QueryBuilder {
+        params[PM.KEYWORDS] = keywords
+        return this
+    }
+
     // Always optional
     fun outputSize(outputSize: OutputSize): QueryBuilder {
         params[PM.OUTPUT_SIZE] = outputSize
         return this
     }
 
-
     fun build(): Query {
-        return Query(type, params)
+        if (type == null) {
+            throw AlphaVantageException("Query type not set")
+        }
+        return Query(type!!, params)
     }
 }

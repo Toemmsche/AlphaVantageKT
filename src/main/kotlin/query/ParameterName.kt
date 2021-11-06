@@ -13,7 +13,8 @@ enum class ParameterName(val strVal: String) {
     DATATYPE("datatype"),
     SYMBOL("symbol"),
     APIKEY("apikey"),
-    SLICE("slice");
+    SLICE("slice"),
+    KEYWORDS("keywords");
 
     override fun toString() = this.strVal
 }

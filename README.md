@@ -7,8 +7,10 @@ The wrapper currently supports stocks, FX, cryptocurrencies and indicators for s
 ### Progress on Rewrite
 - [ ] Stock API
     - [x] Basic time series
-    - [ ] global quote
-    - [ ] search quote endpoint
+    - [x] global quote JSON
+    - [x] search quote endpoint JSON
+    - [ ] global quote CSV
+    - [ ] search endpoint CSV
     - [x] CSV parsing
 - [ ] Technical indicator API
 - [ ] Forex API

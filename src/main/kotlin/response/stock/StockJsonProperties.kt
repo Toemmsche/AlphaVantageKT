@@ -1,6 +1,6 @@
-package response
+package response.stock
 
-enum class JsonProperties(val strVal: String) {
+enum class StockJsonProperties(val strVal: String) {
     METADATA("Meta Data"),
     LAST_REFRESHED("Last Refreshed"),
     SYMBOL("Symbol"),

@@ -1,6 +1,6 @@
-package response
+package response.stock
 
-enum class CsvProperties(val strVal: String) {
+enum class StockCsvProperties(val strVal: String) {
     DATE("time"),
     OPEN("open"),
     HIGH("high"),

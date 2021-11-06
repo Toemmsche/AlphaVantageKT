@@ -1,23 +1,25 @@
-import query.DataType
-import query.Function
-import query.Interval
-import query.OutputSize
 import model.AlphaVantageFactory
+import query.Function
 import query.QueryBuilder
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import query.QueryType
+import java.time.ZoneId
+import java.util.*
 
 fun main() {
-    val date = LocalDate.parse("2021-10-12", DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay()
+    println(TimeZone.getTimeZone(ZoneId.of("UTC+4").normalized()))
     println(QueryBuilder()
+                    .type(QueryType.STOCK)
                     .apiKey("CSE3RJSJLAVEG0HL")
-                    .function(Function.GLOBAL_QUOTE)
+                    .function(Function.SYMBOL_SEARCH)
+                    .keywords("Game")
                     //.adjusted(true)
-                    .symbol("TSLA")
                     .build()
                     .also { println(it.toUrl()) }
                     .send()
-                    .also { println(it.body); AlphaVantageFactory().createGlobalQuote(it)})
+                    .also { println(it.body); println(
+                            AlphaVantageFactory().createSearchMatches(
+                                    it)[0].timeZone.toString())
+                    })
 
 
     //TODO get AMD quotes

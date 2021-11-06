@@ -5,27 +5,33 @@ import component7
 import component8
 import firstWithSuffix
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import model.stock.GlobalQuote
-import model.stock.HistoricalStock
-import model.stock.Stock
+import model.stock.*
 import parseAvDate
+import parseAvTime
+import parseAvTimeZone
 import parseZonedAvDate
 import query.*
+import query.Function
 import response.Response
 import java.time.ZonedDateTime
 import java.util.*
+import kotlin.IllegalArgumentException
+import kotlin.Pair
+import kotlin.String
 import query.ParameterName as PM
-import response.CsvProperties as CP
-import response.GlobalQuoteJsonProperties as GJP
-import response.StockJsonProperties as SJP
+import response.stock.GlobalQuoteJsonProperties as GJP
+import response.stock.SearchJsonProperties as SEJP
+import response.stock.StockCsvProperties as SCP
+import response.stock.StockJsonProperties as SJP
 
 class AlphaVantageFactory {
 
     fun createStock(response: Response): Stock {
         if (response.query.type != QueryType.STOCK) {
             throw IllegalArgumentException(
-                    "Alpha Vantage Query type does not match")
+                    "Alpha Vantage query type does not match")
         }
         val queryParams = response.query.params
         // Every query needs a function
@@ -36,7 +42,7 @@ class AlphaVantageFactory {
             val outputSize =
                     if (queryParams.containsKey(PM.OUTPUT_SIZE))
                         queryParams[PM.OUTPUT_SIZE] as OutputSize else null
-            val timeZone = TimeZone.getTimeZone("US/Eastern")
+            val timeZone = parseAvTimeZone("US/Eastern")
             val symbol = queryParams[PM.SYMBOL] as String
             val csv = response.csv().toMutableList()
             val history = csv.map { createHistoricalStock(it, timeZone) }
@@ -57,7 +63,7 @@ class AlphaVantageFactory {
                     metadata.firstWithSuffix(SJP.SYMBOL.toString())
             // We need the time zone for "last refreshed"
             val timeZone =
-                    TimeZone.getTimeZone(
+                    parseAvTimeZone(
                             metadata.firstWithSuffix(SJP.TIME_ZONE.toString()))
             val lastRefreshed =
                     parseZonedAvDate(
@@ -94,6 +100,7 @@ class AlphaVantageFactory {
 
     fun createHistoricalStock(structure: Pair<String, JsonElement>,
                               timeZone: TimeZone): HistoricalStock {
+
         val identifier = structure.first
         val jsonObject = structure.second.jsonObject
 
@@ -144,7 +151,7 @@ class AlphaVantageFactory {
     fun createHistoricalStock(fields: Map<String, String>,
                               timeZone: TimeZone): HistoricalStock {
         // Parse date
-        val date = parseZonedAvDate(fields[CP.DATE.toString()]!!, timeZone)
+        val date = parseZonedAvDate(fields[SCP.DATE.toString()]!!, timeZone)
         val (
                 open,
                 high,
@@ -155,14 +162,14 @@ class AlphaVantageFactory {
                 dividendAmount,
                 splitCoefficient,
         ) = listOf(
-                CP.OPEN,
-                CP.HIGH,
-                CP.LOW,
-                CP.CLOSE,
-                CP.ADJUSTED_CLOSE,
-                CP.VOLUME,
-                CP.DIVIDEND_AMOUNT,
-                CP.SPLIT_COEFFICIENT,
+                SCP.OPEN,
+                SCP.HIGH,
+                SCP.LOW,
+                SCP.CLOSE,
+                SCP.ADJUSTED_CLOSE,
+                SCP.VOLUME,
+                SCP.DIVIDEND_AMOUNT,
+                SCP.SPLIT_COEFFICIENT,
         ).map { fields[it.toString()]?.toDouble() }
         return HistoricalStock(
                 date,
@@ -178,6 +185,11 @@ class AlphaVantageFactory {
     }
 
     fun createGlobalQuote(response: Response): GlobalQuote {
+        if (response.query.type != QueryType.STOCK ||
+                response.query.params[PM.FUNCTION] != Function.GLOBAL_QUOTE) {
+            throw IllegalArgumentException(
+                    "Alpha Vantage query type does not match")
+        }
         val jsonObject = response
                 .json()
                 .jsonObject[GJP.GLOBAL_QUOTE.toString()]!!
@@ -219,6 +231,56 @@ class AlphaVantageFactory {
                 change,
                 changePercent,
         )
+    }
+
+    fun createSearchMatches(response: Response): BestSearchMatches {
+        if (response.query.type != QueryType.STOCK ||
+                response.query.params[PM.FUNCTION] != Function.SYMBOL_SEARCH) {
+            throw IllegalArgumentException(
+                    "Alpha Vantage query type does not match")
+        }
+        return response
+                .json()
+                .jsonObject[SEJP.BEST_MATCHES.toString()]!!
+                .jsonArray
+                .map {
+                    val jsonObject = it.jsonObject
+                    val marketOpen = parseAvTime(
+                            jsonObject.firstWithSuffix(SEJP.MARKET_OPEN))
+                    val marketClose = parseAvTime(
+                            jsonObject.firstWithSuffix(SEJP.MARKET_CLOSE))
+                    val currency =
+                            Currency.getInstance(
+                                    jsonObject.firstWithSuffix(SEJP.CURRENCY))
+                    val matchScore =
+                            jsonObject.firstWithSuffix(SEJP.MATCH_SCORE)
+                                    .toFloat()
+                    val timeZone = parseAvTimeZone(
+                            jsonObject.firstWithSuffix(SEJP.TIMEZONE))
+                    val (
+                            symbol,
+                            name,
+                            type,
+                            region,
+                    ) = listOf(
+                            SEJP.SYMBOL,
+                            SEJP.NAME,
+                            SEJP.TYPE,
+                            SEJP.REGION,
+                    ).map { jsonObject.firstWithSuffix(it.toString()) }
+                    SearchMatch(
+                            symbol,
+                            name,
+                            type,
+                            region,
+                            marketOpen,
+                            marketClose,
+                            timeZone,
+                            currency,
+                            matchScore,
+                    )
+                }
+                .toCollection(BestSearchMatches())
     }
 
 
