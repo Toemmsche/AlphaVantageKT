@@ -14,7 +14,9 @@ enum class OutputSize(val strVal: String, val aliases: Set<String>) {
 
     companion object {
         fun fromAlias(alias: String): OutputSize {
-            return OutputSize.values().first { it.aliases.contains(alias) }
+            return OutputSize
+                    .values()
+                    .first { it.strVal == alias || it.aliases.contains(alias) }
         }
     }
 }
